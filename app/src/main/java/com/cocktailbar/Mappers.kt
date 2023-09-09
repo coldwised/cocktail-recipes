@@ -1,22 +1,14 @@
 package com.cocktailbar
 
-import com.cocktailbar.data.local.CocktailEntity
-import com.cocktailbar.presentation.Cocktail
+import cocktaildb.CocktailEntity
+import com.cocktailbar.domain.model.Cocktail
 
 fun CocktailEntity.toCocktail(): Cocktail {
     return Cocktail(
+        id = id,
         name = name,
         description = description,
         recipe = recipe,
         ingredients = ingredients.split(',')
-    )
-}
-
-fun Cocktail.toCocktailEntity(): CocktailEntity {
-    return CocktailEntity(
-        name = name,
-        description = description,
-        recipe = recipe,
-        ingredients = ingredients.joinToString(",")
     )
 }

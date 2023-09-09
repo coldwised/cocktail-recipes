@@ -1,21 +1,21 @@
 package com.cocktailbar.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisallowComposableCalls
-import androidx.compose.runtime.remember
-import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.instancekeeper.getOrCreate
-import io.github.xxfast.decompose.LocalComponentContext
+import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.Lifecycle
+import com.arkivanov.essenty.lifecycle.doOnDestroy
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-@Composable
-inline fun <reified T : ViewModel> rememberViewModel(
-    key: Any = T::class,
-    crossinline block: @DisallowComposableCalls () -> T
-): T {
-    val component: ComponentContext = LocalComponentContext.current
-    val packageName: String? = T::class.qualifiedName
-    val viewModelKey = "$packageName.view-model"
-    return remember(key) {
-        component.instanceKeeper.getOrCreate(viewModelKey) { block() }
+fun <T : Any> Value<T>.toStateFlow(lifecycle: Lifecycle): StateFlow<T> {
+    val state = MutableStateFlow(this.value)
+
+    if (lifecycle.state != Lifecycle.State.DESTROYED) {
+        val observer = { value: T -> state.value = value }
+        subscribe(observer)
+        lifecycle.doOnDestroy {
+            unsubscribe(observer)
+        }
     }
+
+    return state
 }

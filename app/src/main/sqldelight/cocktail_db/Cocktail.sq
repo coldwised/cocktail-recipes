@@ -1,0 +1,16 @@
+CREATE TABLE cocktailEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    recipe TEXT NOT NULL,
+    ingredients TEXT NOT NULL
+);
+
+getCocktails:
+SELECT *
+FROM cocktailEntity;
+
+addCocktail:
+INSERT OR REPLACE
+INTO cocktailEntity
+VALUES(?, ?, ?, ?, ?);
