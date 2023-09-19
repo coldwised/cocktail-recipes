@@ -10,10 +10,5 @@ import androidx.compose.ui.Modifier
 fun CocktailListScreen(cocktailList: ICocktailListComponent) {
     Box(modifier = Modifier.fillMaxSize()) {
         Text("cocktails list")
-        Text("cocktails list")
-        Text("cocktails list")
-        Text("cocktails list")
-        Text("cocktails list")
-        Text("cocktails list")
     }
 }
