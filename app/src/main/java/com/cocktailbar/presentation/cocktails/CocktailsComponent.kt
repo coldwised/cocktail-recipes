@@ -1,58 +1,96 @@
 package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
+import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.stack.ChildStack
+import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
-import com.cocktailbar.domain.use_case.GetCocktailsUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import com.cocktailbar.util.toStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.Parcelize
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class CocktailsComponent(
     @Assisted componentContext: ComponentContext,
-    @Assisted private val navigateToCocktail: (Cocktail) -> Unit,
-    private val getCocktailsUseCase: GetCocktailsUseCase,
-): ICocktailsComponent, ComponentContext by componentContext {
+    private val cocktailDetailsFactory: (
+        ComponentContext,
+        Cocktail,
+        (Cocktail) -> Unit,
+    ) -> CocktailDetailsComponent,
+    private val cocktailListFactory: (
+        ComponentContext,
+        (Cocktail) -> Unit,
+    ) -> CocktailListComponent,
+) : ICocktailsComponent, ComponentContext by componentContext {
+    private val slotNavigation = SlotNavigation<SlotConfig>()
+    private val navigation = StackNavigation<ChildConfig>()
 
-    private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
-
-    private val _state = MutableStateFlow(CocktailsState())
-    val state = _state.asStateFlow()
-
-    init {
-        dispatch(CocktailsUiEvent.LoadCocktails)
+    @Parcelize
+    private sealed interface SlotConfig : Parcelable {
+        @Parcelize
+        data class CocktailDetails(val cocktail: Cocktail) : SlotConfig
     }
 
-    fun dispatch(cocktailsUiEvent: CocktailsUiEvent) {
-        reduce(cocktailsUiEvent, state.value)
+    @Parcelize
+    private sealed interface ChildConfig : Parcelable {
+        @Parcelize
+        data object CocktailList : ChildConfig
     }
 
-    private fun reduce(event: CocktailsUiEvent, state: CocktailsState) {
-        componentScope.launch {
-            when(event) {
-                is CocktailsUiEvent.LoadCocktails -> {
-                    setStateLoading()
-                    getCocktailsUseCase().collect { cocktails ->
-                        updateState(state.copy(cocktails = cocktails, isLoading = false))
-                    }
-                }
-                is CocktailsUiEvent.OnCocktailClicked -> {
-                    navigateToCocktail(event.cocktail)
-                }
+    override val childStack: StateFlow<ChildStack<*, ICocktailsComponent.Child>> =
+        childStack(
+            source = navigation,
+            handleBackButton = true,
+            initialConfiguration = ChildConfig.CocktailList,
+            childFactory = ::createChild
+        ).toStateFlow(lifecycle)
+
+
+    override val childSlot: StateFlow<ChildSlot<*, ICocktailsComponent.SlotChild>> =
+        childSlot(
+            source = slotNavigation,
+            handleBackButton = true,
+            childFactory = ::createSlotChild
+        ).toStateFlow(lifecycle)
+
+    private fun createChild(
+        config: ChildConfig,
+        componentContext: ComponentContext
+    ): ICocktailsComponent.Child {
+        return when(config) {
+            is ChildConfig.CocktailList -> {
+                ICocktailsComponent.Child.CocktailList(
+                    cocktailListFactory(
+                        componentContext,
+                        { cocktail -> slotNavigation.activate(SlotConfig.CocktailDetails(cocktail)) }
+                    )
+                )
             }
         }
     }
 
-    private fun setStateLoading() {
-        updateState(CocktailsState())
-    }
 
-    private fun updateState(newState: CocktailsState) {
-        _state.value = newState
+    private fun createSlotChild(
+        slotConfig: SlotConfig,
+        componentContext: ComponentContext,
+    ): ICocktailsComponent.SlotChild {
+        return when (slotConfig) {
+            is SlotConfig.CocktailDetails -> {
+                ICocktailsComponent.SlotChild.CocktailDetailsChild(
+                    cocktailDetailsFactory(
+                        componentContext,
+                        slotConfig.cocktail,
+                        {}
+                    )
+                )
+            }
+        }
     }
 }

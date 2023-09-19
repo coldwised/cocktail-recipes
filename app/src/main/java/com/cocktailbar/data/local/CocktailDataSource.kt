@@ -12,4 +12,8 @@ interface CocktailDataSource {
         recipe: String,
         ingredients: String,
     )
+
+    companion object {
+        const val NAME = "cocktail.db"
+    }
 }

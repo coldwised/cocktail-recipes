@@ -16,9 +16,11 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.retainedComponent
+import com.cocktailbar.data.local.CocktailDataSource
 import com.cocktailbar.di.AppComponent
 import com.cocktailbar.di.create
 import com.cocktailbar.presentation.RootComponent
+import com.cocktailbar.presentation.RootScreen
 import com.cocktailbar.ui.theme.CocktailBarTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import me.tatarka.inject.annotations.Component
@@ -43,13 +45,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        retainedComponent {
+        val root = retainedComponent {
             ActivityComponent::class.create(
                 AppComponent::class.create(
                     AndroidSqliteDriver(
                         schema = CocktailDatabase.Schema,
                         context = this,
-                        name = "cocktail.db"
+                        name = CocktailDataSource.NAME
                     )
                 )
             ).rootComponentCreator.create(it)
@@ -62,7 +64,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
+                    RootScreen(root = root)
                 }
             }
         }
