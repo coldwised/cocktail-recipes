@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.presentation.cocktails.CocktailEditComponent
@@ -18,7 +19,9 @@ import me.tatarka.inject.annotations.Inject
 class RootComponent(
     @Assisted componentContext: ComponentContext,
     private val cocktailsFactory:
-        (ComponentContext) -> CocktailsComponent,
+        (ComponentContext, () -> Unit) -> CocktailsComponent,
+    private val cocktailEditComponentFactory:
+        (ComponentContext, Cocktail?) -> CocktailEditComponent
 ) : IRootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<ChildConfig>()
@@ -40,12 +43,25 @@ class RootComponent(
                 IRootComponent.Child.CocktailsChild(
                     cocktailsFactory(
                         componentContext,
+                        { navigation.push(ChildConfig.CocktailCreate) }
                     )
                 )
             }
+
             is ChildConfig.CocktailEdit -> {
                 IRootComponent.Child.CocktailEditChild(
-                    CocktailEditComponent(componentContext)
+                    cocktailEditComponentFactory(
+                        componentContext,
+                        config.cocktail
+                    )
+                )
+            }
+            is ChildConfig.CocktailCreate -> {
+                IRootComponent.Child.CocktailEditChild(
+                    cocktailEditComponentFactory(
+                        componentContext,
+                        null
+                    )
                 )
             }
         }
@@ -58,5 +74,7 @@ class RootComponent(
 
         @Parcelize
         data class CocktailEdit(val cocktail: Cocktail) : ChildConfig
+        @Parcelize
+        data object CocktailCreate : ChildConfig
     }
 }

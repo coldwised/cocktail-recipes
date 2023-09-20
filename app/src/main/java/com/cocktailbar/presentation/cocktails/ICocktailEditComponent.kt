@@ -1,5 +1,8 @@
 package com.cocktailbar.presentation.cocktails
 
-interface ICocktailEditComponent {
+import kotlinx.coroutines.flow.StateFlow
 
+interface ICocktailEditComponent {
+    val state: StateFlow<CocktailEditState>
+    fun dispatch(cocktailsUiEvent: CocktailEditUiEvent)
 }

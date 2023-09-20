@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.cocktailbar.presentation.cocktails.CocktailsScreen
+import com.cocktailbar.presentation.cocktails.EditCocktailScreen
 
 @Composable
 fun RootScreen(root: IRootComponent) {

@@ -19,6 +19,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childStack = cocktailsComponent.childStack.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+    val customShapeWithCutout = remember { customShapeWithCutout(120f, 300f) }
     BottomSheetScaffold(
         scaffoldState = sheetScaffoldState,
         sheetContent = {
@@ -60,7 +62,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                 }
             }
         },
-        sheetShape = customShapeWithCutout(120f, 300f),
+        sheetShape = customShapeWithCutout,
         // sheetPeekHeight = 600.dp,
     ) { paddingValues ->
         Box(
@@ -81,7 +83,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     modifier = Modifier
                         .size(80.dp),
                     shape = CircleShape,
-                    onClick = { /*TODO*/ }
+                    onClick = cocktailsComponent::navigateToCreateCocktail
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }

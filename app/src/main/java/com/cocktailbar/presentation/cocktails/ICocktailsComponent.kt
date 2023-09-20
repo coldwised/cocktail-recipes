@@ -15,4 +15,6 @@ interface ICocktailsComponent {
     sealed interface Child {
         data class CocktailList(val component: ICocktailListComponent): Child
     }
+
+    fun navigateToCreateCocktail()
 }

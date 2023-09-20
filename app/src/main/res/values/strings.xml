@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Cocktail Bar</string>
+    <string name="save_button">Save</string>
+    <string name="cocktail_name">Cocktail name</string>
+    <string name="cocktail_description">Cocktail description</string>
+    <string name="cocktail_recipe">Cocktail recipe</string>
+    <string name="add_title">Add Title</string>
+    <string name="optional_field">Optional field</string>
 </resources>

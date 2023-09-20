@@ -27,7 +27,7 @@ class CocktailListComponent(
         dispatch(CocktailsUiEvent.LoadCocktails)
     }
 
-    fun dispatch(cocktailsUiEvent: CocktailsUiEvent) {
+    override fun dispatch(cocktailsUiEvent: CocktailsUiEvent) {
         reduce(cocktailsUiEvent, state.value)
     }
 

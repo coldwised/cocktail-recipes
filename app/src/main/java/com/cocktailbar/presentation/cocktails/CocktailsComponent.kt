@@ -19,6 +19,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class CocktailsComponent(
     @Assisted componentContext: ComponentContext,
+    @Assisted private val navigateToCreateCocktailScreen: () -> Unit,
     private val cocktailDetailsFactory: (
         ComponentContext,
         Cocktail,
@@ -93,4 +94,6 @@ class CocktailsComponent(
             }
         }
     }
+
+    override fun navigateToCreateCocktail() = navigateToCreateCocktailScreen()
 }
