@@ -50,6 +50,9 @@ class CocktailEditComponent(
                 is ChangeRecipeValue -> {
                     updateState(state.copy(recipe = event.value))
                 }
+                is OnPickerResult -> {
+                    updateState(state.copy(image = event.uri?.toString()))
+                }
             }
         }
     }

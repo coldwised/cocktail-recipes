@@ -58,6 +58,9 @@ dependencies {
 //    implementation 'io.github.xxfast:decompose-router:0.4.0'
 //    implementation 'io.github.xxfast:decompose-router-android:0.4.0'
 
+    // Coil
+    implementation "io.coil-kt:coil-compose:2.4.0"
+
     // MVIKotlin
     implementation "com.arkivanov.mvikotlin:mvikotlin:3.2.1"
     implementation "com.arkivanov.mvikotlin:mvikotlin-main:3.2.1"

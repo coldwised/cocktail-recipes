@@ -1,5 +1,11 @@
 package com.cocktailbar.presentation.cocktails
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +28,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.cocktailbar.R
+import com.cocktailbar.presentation.cocktails.CocktailEditState.Companion.LOADER_PROGRESS_COMPLETED
 
 @Composable
 fun EditCocktailScreen(
@@ -48,7 +56,13 @@ fun EditCocktailScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
             val textFieldShape = remember { CircleShape }
+            CocktailImage(
+                loaderProgress = state.imageLoaderProgress,
+                image = state.image,
+                onPickerResult = { dispatch(OnPickerResult(it)) }
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Title(
                 modifier = maxWidthModifier,
@@ -78,6 +92,32 @@ fun EditCocktailScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
         }   
+    }
+}
+
+@Composable
+fun CocktailImage(
+    loaderProgress: Float,
+    image: String?,
+    onPickerResult: (Uri?) -> Unit,
+) {
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = onPickerResult
+    )
+    Box(
+        Modifier.clickable {
+            imagePicker.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    ) {
+        AsyncImage(
+            model = image?: R.drawable.ic_launcher_background,
+            contentDescription = null
+        )
+        if(image != null && loaderProgress < LOADER_PROGRESS_COMPLETED)
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), progress = loaderProgress)
     }
 }
 

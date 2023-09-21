@@ -12,8 +12,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
+import com.cocktailbar.util.toPx
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,34 +43,36 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childStack = cocktailsComponent.childStack.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val customShapeWithCutout = remember { customShapeWithCutout(120f, 300f) }
-    BottomSheetScaffold(
-        scaffoldState = sheetScaffoldState,
-        sheetContent = {
-            val child = childSlot.child
-            LaunchedEffect(child == null) {
-                if (child == null) {
-                    sheetState.partialExpand()
-                } else {
-                    sheetState.show()
-                }
-            }
-            if (child != null) {
-                when(val childInstance = child.instance) {
-                    is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
-                        CocktailDetails(childInstance.component)
+    val fabSize = remember { 80.dp }
+    val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
+    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, 300f) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        BottomSheetScaffold(
+            scaffoldState = sheetScaffoldState,
+            sheetContent = {
+                val child = childSlot.child
+                LaunchedEffect(child == null) {
+                    if (child == null) {
+                        sheetState.partialExpand()
+                    } else {
+                        sheetState.show()
                     }
                 }
-            }
-        },
-        sheetShape = customShapeWithCutout,
-        // sheetPeekHeight = 600.dp,
-    ) { paddingValues ->
-        Box(
-            Modifier.fillMaxSize()
-        ) {
+                if (child != null) {
+                    when(val childInstance = child.instance) {
+                        is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
+                            CocktailDetails(childInstance.component)
+                        }
+                    }
+                }
+            },
+            sheetShape = customShapeWithCutout,
+        ) { paddingValues ->
             Children(
-                modifier = Modifier.padding(paddingValues).fillMaxSize().statusBarsPadding(),
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .statusBarsPadding(),
                 stack = childStack,
             ) {
                 when(val child = it.instance) {
@@ -78,17 +81,17 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     }
                 }
             }
-            Column(modifier = Modifier.align(BottomCenter), horizontalAlignment = CenterHorizontally) {
-                Button(
-                    modifier = Modifier
-                        .size(80.dp),
-                    shape = CircleShape,
-                    onClick = cocktailsComponent::navigateToCreateCocktail
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                }
-                Spacer(Modifier.height(16.dp))
+        }
+        Column(modifier = Modifier.align(BottomCenter), horizontalAlignment = CenterHorizontally) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .size(fabSize),
+                shape = CircleShape,
+                onClick = cocktailsComponent::navigateToCreateCocktail
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

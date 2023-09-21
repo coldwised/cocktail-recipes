@@ -35,7 +35,7 @@ class CocktailListComponent(
         componentScope.launch {
             when(event) {
                 is CocktailsUiEvent.LoadCocktails -> {
-                    setStateLoading()
+                    updateState(emptyState)
                     getCocktailsUseCase().collect { cocktails ->
                         updateState(state.copy(cocktails = cocktails, isLoading = false))
                     }
@@ -49,11 +49,9 @@ class CocktailListComponent(
         }
     }
 
-    private fun setStateLoading() {
-        updateState(CocktailListState())
-    }
-
     private fun updateState(newState: CocktailListState) {
         _state.value = newState
     }
+
+    private val emptyState = CocktailListState()
 }
