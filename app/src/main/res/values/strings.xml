@@ -6,4 +6,5 @@
     <string name="cocktail_recipe">Cocktail recipe</string>
     <string name="add_title">Add Title</string>
     <string name="optional_field">Optional field</string>
+    <string name="ingredients">Ingredients</string>
 </resources>

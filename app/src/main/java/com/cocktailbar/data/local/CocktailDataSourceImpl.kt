@@ -1,15 +1,65 @@
 package com.cocktailbar.data.local
 
+import android.content.ContentResolver
+import android.net.Uri
 import cocktaildb.CocktailEntity
 import com.cocktailbar.CocktailDatabase
+import com.cocktailbar.data.local.CocktailDataSource.Companion.COCKTAIL_IMAGES_DIR
+import com.cocktailbar.util.DownloadState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class CocktailDataSourceImpl(db: CocktailDatabase): CocktailDataSource {
+class CocktailDataSourceImpl(
+    db: CocktailDatabase,
+    fileProvider: FileProvider,
+    private val contentResolver: ContentResolver,
+) : CocktailDataSource {
 
     private val queries = db.cocktailQueries
+
+    private val cocktailImagesDir = fileProvider.getFile(COCKTAIL_IMAGES_DIR)
 
     override suspend fun getCocktails(): List<CocktailEntity> {
         return queries.getCocktails().executeAsList()
     }
+
+    private fun generateUniqueFileName(uri: Uri): String {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val hashCode = uri.hashCode()
+
+        return "image_${timestamp}_$hashCode.jpg"
+    }
+
+    override fun saveCocktailImage(uri: Uri): Flow<DownloadState<String>> {
+        return flow {
+            emit(DownloadState.Downloading(0))
+            val imageFile = File(cocktailImagesDir, generateUniqueFileName(uri))
+            imageFile.outputStream().use { outputStream ->
+                contentResolver.openAssetFileDescriptor(uri, "r").use { fileDescriptor ->
+                    fileDescriptor?.createInputStream()?.use { inputStream ->
+                        val totalBytes = fileDescriptor.length
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        var progressBytes = 0L
+                        var bytes = inputStream.read(buffer)
+                        while(bytes > 0) {
+                            outputStream.write(buffer, 0, bytes)
+                            progressBytes += bytes
+                            bytes = inputStream.read(buffer)
+                            emit(DownloadState.Downloading((progressBytes * 100 / totalBytes).toInt()))
+                        }
+                    }
+                }
+            }
+            emit(DownloadState.Finished(imageFile.path))
+        }
+    }
+
+    override fun getCocktailImagesDir() = cocktailImagesDir
+
 
     override suspend fun addCocktail(
         id: Long?,

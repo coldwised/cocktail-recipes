@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -23,21 +24,26 @@ class CocktailListComponent(
     private val _state = MutableStateFlow(CocktailListState())
     override val state = _state.asStateFlow()
 
+    private val emptyState = CocktailListState()
+
     init {
         dispatch(CocktailsUiEvent.LoadCocktails)
     }
 
     override fun dispatch(cocktailsUiEvent: CocktailsUiEvent) {
-        reduce(cocktailsUiEvent, state.value)
+        reduce(cocktailsUiEvent)
     }
 
-    private fun reduce(event: CocktailsUiEvent, state: CocktailListState) {
+    private fun reduce(event: CocktailsUiEvent) {
         componentScope.launch {
+            val stateFlow = _state
             when(event) {
                 is CocktailsUiEvent.LoadCocktails -> {
-                    updateState(emptyState)
+                    stateFlow.update { emptyState }
                     getCocktailsUseCase().collect { cocktails ->
-                        updateState(state.copy(cocktails = cocktails, isLoading = false))
+                        stateFlow.update {
+                            it.copy(cocktails = cocktails, isLoading = false)
+                        }
                     }
                 }
                 is CocktailsUiEvent.OnCocktailClicked -> {
@@ -48,10 +54,4 @@ class CocktailListComponent(
             }
         }
     }
-
-    private fun updateState(newState: CocktailListState) {
-        _state.value = newState
-    }
-
-    private val emptyState = CocktailListState()
 }

@@ -4,9 +4,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,17 +17,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,16 +67,16 @@ fun EditCocktailScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
+           // horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(64.dp))
             val textFieldShape = remember { CircleShape }
             CocktailImage(
-                loaderProgress = state.imageLoaderProgress,
+                loaderProgress = state.imageLoaderProgress / 100f,
                 image = state.image,
                 onPickerResult = { dispatch(OnPickerResult(it)) }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(64.dp))
             Title(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
@@ -106,18 +119,30 @@ fun CocktailImage(
         onResult = onPickerResult
     )
     Box(
-        Modifier.clickable {
-            imagePicker.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 64.dp)
+            .clip(RoundedCornerShape(60.dp))
+            .clickable {
+                imagePicker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }
     ) {
         AsyncImage(
-            model = image?: R.drawable.ic_launcher_background,
+            model = image ?: R.drawable.ic_launcher_background,
+            contentScale = ContentScale.Fit,
+            placeholder = painterResource(id = R.drawable.ic_launcher_background),
             contentDescription = null
         )
-        if(image != null && loaderProgress < LOADER_PROGRESS_COMPLETED)
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), progress = loaderProgress)
+        if(image != null && loaderProgress < LOADER_PROGRESS_COMPLETED) {
+            val animatedProgress by animateFloatAsState(
+                targetValue = loaderProgress,
+                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+                label = ""
+            )
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), progress = animatedProgress)
+        }
     }
 }
 
@@ -183,9 +208,21 @@ fun Description(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Ingredients(
 ) {
+    Text(
+        text = stringResource(R.string.ingredients)
+    )
+    FlowRow {
+        IconButton(onClick = { /*TODO*/ }) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = null
+            )
+        }
+    }
 }
 
 @Composable

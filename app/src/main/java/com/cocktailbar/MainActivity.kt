@@ -12,11 +12,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.retainedComponent
-import com.cocktailbar.data.local.CocktailDataSource
 import com.cocktailbar.di.AppComponent
 import com.cocktailbar.di.create
 import com.cocktailbar.presentation.RootComponent
@@ -48,11 +46,7 @@ class MainActivity : ComponentActivity() {
         val root = retainedComponent {
             ActivityComponent::class.create(
                 AppComponent::class.create(
-                    AndroidSqliteDriver(
-                        schema = CocktailDatabase.Schema,
-                        context = this,
-                        name = CocktailDataSource.NAME
-                    )
+                    applicationContext
                 )
             ).rootComponentCreator.create(it)
         }
