@@ -9,9 +9,6 @@ import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class CocktailDataSourceImpl(
     db: CocktailDatabase,
@@ -28,10 +25,8 @@ class CocktailDataSourceImpl(
     }
 
     private fun generateUniqueFileName(uri: Uri): String {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val hashCode = uri.hashCode()
-
-        return "image_${timestamp}_$hashCode.jpg"
+        val code = uri.toString().split('/').last()
+        return "$code.jpg"
     }
 
     override fun saveCocktailImage(uri: Uri): Flow<DownloadState<String>> {
@@ -55,6 +50,12 @@ class CocktailDataSourceImpl(
                 }
             }
             emit(DownloadState.Finished(imageFile.path))
+        }
+    }
+
+    override suspend fun deleteCocktailImage(path: String) {
+        File(path).let {
+            if(it.exists()) it.delete()
         }
     }
 

@@ -3,6 +3,7 @@ package com.cocktailbar.presentation.cocktails
 import com.arkivanov.decompose.ComponentContext
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.domain.use_case.AddCocktailUseCase
+import com.cocktailbar.domain.use_case.DeleteCocktailImageUseCase
 import com.cocktailbar.domain.use_case.SaveCocktailImageUseCase
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ class CocktailEditComponent(
     @Assisted cocktail: Cocktail?,
     private val addCocktailUseCase: AddCocktailUseCase,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
+    private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase
 ) : ComponentContext by componentContext, ICocktailEditComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private val _state = MutableStateFlow(CocktailEditState())
@@ -63,29 +65,31 @@ class CocktailEditComponent(
                 }
 
                 is OnPickerResult -> {
-                    event.uri?.let { uri ->
-                        stateFlow.update { it.copy(image = uri.toString()) }
-//                        stateFlow.update {
-//                            it.copy(
-//                                imageLoaderProgress = 50
-//                            )
-//                        }
-//                        return@let
-                        saveCocktailImageUseCase(uri).collect { result ->
-                            when (result) {
-                                is DownloadState.Downloading -> stateFlow.update {
-                                    it.copy(
-                                        imageLoaderProgress = result.progress
-                                    )
-                                }
-                                is DownloadState.Finished -> {
-                                    stateFlow.update {
-                                        it.copy(image = result.value, imageLoaderProgress = 100)
-                                    }
+                    val uri = event.uri ?: return@launch
+                    stateFlow.value.image?.let {
+                        launch(Dispatchers.IO) {
+                            deleteCocktailImageUseCase(it)
+                        }
+                    }
+                    stateFlow.update { it.copy(image = uri.toString()) }
+                    saveCocktailImageUseCase(uri).collect { result ->
+                        when (result) {
+                            is DownloadState.Downloading -> stateFlow.update {
+                                it.copy(
+                                    imageLoaderProgressPercentage = result.progress
+                                )
+                            }
+                            is DownloadState.Finished -> {
+                                stateFlow.update {
+                                    it.copy(image = result.value, imageLoaderProgressPercentage = 100)
                                 }
                             }
                         }
                     }
+                }
+
+                is OnCocktailPictureLoaderCompleted -> {
+                    stateFlow.update { it.copy(imageLoaderProgressPercentage = null) }
                 }
             }
         }

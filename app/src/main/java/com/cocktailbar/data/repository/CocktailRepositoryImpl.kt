@@ -28,6 +28,10 @@ class CocktailRepositoryImpl(
         return cocktailDataSource.saveCocktailImage(uri).flowOn(Dispatchers.IO)
     }
 
+    override suspend fun deleteCocktailImage(path: String) {
+        cocktailDataSource.deleteCocktailImage(path)
+    }
+
     override suspend fun addCocktail(cocktail: Cocktail) {
         cocktailDataSource.addCocktail(
             id = cocktail.id,

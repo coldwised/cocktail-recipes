@@ -25,4 +25,5 @@ interface CocktailDataSource {
     }
 
     fun saveCocktailImage(uri: Uri): Flow<DownloadState<String>>
+    suspend fun deleteCocktailImage(path: String)
 }

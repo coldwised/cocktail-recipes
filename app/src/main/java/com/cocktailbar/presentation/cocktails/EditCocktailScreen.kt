@@ -5,12 +5,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,15 +38,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.cocktailbar.R
-import com.cocktailbar.presentation.cocktails.CocktailEditState.Companion.LOADER_PROGRESS_COMPLETED
 
 @Composable
 fun EditCocktailScreen(
@@ -58,7 +62,7 @@ fun EditCocktailScreen(
             BottomBar(
                 modifier = maxWidthModifier.height(50.dp),
                 saveLoading = state.saveLoading,
-                onSaveClick = { dispatch(SaveCocktail)}
+                onSaveClick = { dispatch(SaveCocktail) }
             )
         }
     ) { paddingValues ->
@@ -67,14 +71,14 @@ fun EditCocktailScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-           // horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(64.dp))
             val textFieldShape = remember { CircleShape }
             CocktailImage(
-                loaderProgress = state.imageLoaderProgress / 100f,
+                loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
                 image = state.image,
-                onPickerResult = { dispatch(OnPickerResult(it)) }
+                onPickerResult = { dispatch(OnPickerResult(it)) },
+                onCocktailPictureLoaderCompleted = { dispatch(OnCocktailPictureLoaderCompleted) }
             )
             Spacer(modifier = Modifier.height(64.dp))
             Title(
@@ -104,44 +108,61 @@ fun EditCocktailScreen(
                 onQueryChange = { dispatch(ChangeRecipeValue(it)) }
             )
             Spacer(modifier = Modifier.height(16.dp))
-        }   
+        }
     }
 }
 
 @Composable
 fun CocktailImage(
-    loaderProgress: Float,
+    loaderProgress: Float?,
     image: String?,
     onPickerResult: (Uri?) -> Unit,
+    onCocktailPictureLoaderCompleted: () -> Unit
 ) {
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = onPickerResult
     )
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 64.dp)
-            .clip(RoundedCornerShape(60.dp))
-            .clickable {
-                imagePicker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+    Box {
+        val coilPainter = rememberAsyncImagePainter(
+            model = ImageRequest
+                .Builder(LocalContext.current)
+                .data(image ?: R.drawable.cocktail_placeholder)
+                .crossfade(true)
+                .memoryCacheKey(image?.split('/')?.last()?.substringBefore('.'))
+                .build(),
+            contentScale = ContentScale.FillBounds
+        )
+        Image(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 64.dp)
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(60.dp))
+                .clickable(
+                    enabled = loaderProgress == null,
+                    onClick = {
+                        imagePicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
                 )
-            }
-    ) {
-        AsyncImage(
-            model = image ?: R.drawable.ic_launcher_background,
-            contentScale = ContentScale.Fit,
-            placeholder = painterResource(id = R.drawable.ic_launcher_background),
+                .background(Color.LightGray),
+            painter = coilPainter,
+            contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
-        if(image != null && loaderProgress < LOADER_PROGRESS_COMPLETED) {
+        if (image != null && loaderProgress != null) {
             val animatedProgress by animateFloatAsState(
                 targetValue = loaderProgress,
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                label = ""
+                label = "",
+                finishedListener = { progress -> if (progress >= 1f) onCocktailPictureLoaderCompleted() }
             )
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), progress = animatedProgress)
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                progress = animatedProgress
+            )
         }
     }
 }
@@ -157,7 +178,7 @@ fun BottomBar(
         shape = CircleShape,
         onClick = onSaveClick
     ) {
-        if(saveLoading) {
+        if (saveLoading) {
             CircularProgressIndicator()
         } else {
             Text(text = stringResource(R.string.save_button))
