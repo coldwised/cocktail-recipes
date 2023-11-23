@@ -16,16 +16,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.cocktailbar.domain.model.Cocktail
 
 @Composable
-fun CocktailListScreen(cocktailList: ICocktailListComponent) {
-    val state = cocktailList.state.collectAsStateWithLifecycle().value
+fun CocktailListScreen(cocktailListComponent: ICocktailListComponent) {
+    val state = cocktailListComponent.state.collectAsStateWithLifecycle().value
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else if (state.cocktails.isNotEmpty()) {
-
+            CocktailsGrid(
+                cocktails = state.cocktails,
+            )
         }
     }
 }
@@ -38,8 +41,8 @@ fun CocktailsGrid(cocktails: List<Cocktail>) {
     ) {
         items(
             items = cocktails
-        ) {
-
+        ) { cocktail ->
+            CocktailItem(cocktail)
         }
     }
 }
@@ -50,6 +53,10 @@ fun CocktailItem(cocktail: Cocktail) {
         modifier = Modifier
             .clip(RoundedCornerShape(100.dp))
     ) {
+        AsyncImage(
+            model = cocktail.image,
+            contentDescription = null
+        )
         Text(
             modifier = Modifier.align(Alignment.BottomCenter),
             text = cocktail.name

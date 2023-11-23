@@ -21,9 +21,10 @@ class CocktailEditComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted cocktail: Cocktail?,
     @Assisted private val openIngredientDialog: () -> Unit,
+    @Assisted private val navigateBackWithRefresh: () -> Unit,
     private val addCocktailUseCase: AddCocktailUseCase,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
-    private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase
+    private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase,
 ) : ComponentContext by componentContext, ICocktailEditComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private val _state = MutableStateFlow(CocktailEditState())
@@ -39,7 +40,7 @@ class CocktailEditComponent(
             val stateFlow = _state
             when (event) {
                 is SaveCocktail -> {
-                    stateFlow.update { CocktailEditState(saveLoading = true) }
+                    stateFlow.update { it.copy(saveLoading = true) }
                     val state = stateFlow.value
                     addCocktailUseCase(
                         Cocktail(
@@ -47,10 +48,12 @@ class CocktailEditComponent(
                             name = state.title,
                             description = state.description,
                             recipe = state.recipe,
-                            ingredients = state.ingredients
+                            ingredients = state.ingredients,
+                            image = state.image,
                         )
                     )
-                    stateFlow.update { CocktailEditState(saveLoading = false) }
+                    stateFlow.update { it.copy(saveLoading = false) }
+                    navigateBackWithRefresh()
                 }
 
                 is ChangeTitleValue -> {
@@ -102,7 +105,7 @@ class CocktailEditComponent(
                 }
 
                 is RemoveIngredient -> {
-                    stateFlow.update { it.copy(ingredients = it.ingredients.filterIndexed { index, _ -> index == event.index })}
+                    stateFlow.update { it.copy(ingredients = it.ingredients.filterIndexed { index, _ -> index != event.index })}
                 }
             }
         }

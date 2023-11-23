@@ -38,7 +38,8 @@ class CocktailRepositoryImpl(
             name = cocktail.name,
             description = cocktail.description,
             recipe = cocktail.recipe,
-            ingredients = cocktail.ingredients.joinToString(",")
+            ingredients = cocktail.ingredients.joinToString(","),
+            image = cocktail.image,
         )
     }
 }

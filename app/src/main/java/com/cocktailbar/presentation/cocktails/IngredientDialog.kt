@@ -1,5 +1,6 @@
 package com.cocktailbar.presentation.cocktails
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.R
@@ -20,7 +22,12 @@ import com.cocktailbar.R
 fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
     val state = ingredientDialogComponent.state.collectAsStateWithLifecycle().value
     val dispatch = ingredientDialogComponent::dispatch
-    val buttonModifier = remember { Modifier.fillMaxWidth().height(55.dp) }
+    val buttonModifier = remember {
+        Modifier
+            .fillMaxWidth()
+            .height(55.dp) }
+    val ingredientText = state.ingredientText
+    val isBlankText = ingredientText.isBlank()
     AlertDialog(
         onDismissRequest = { dispatch(IngredientDialogEvent.OnDismiss) },
         confirmButton = {
@@ -34,16 +41,32 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
         dismissButton = {
             Button(
                 modifier = buttonModifier,
-                onClick = { dispatch(IngredientDialogEvent.OnSaveIngredient) }
+                onClick = { dispatch(IngredientDialogEvent.OnSaveIngredient) },
+                enabled = !isBlankText
             ) {
                 Text(stringResource(R.string.add))
             }
         },
+        title = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(R.string.add_ingredient_title)
+            )
+        },
         text = {
             OutlinedTextField(
-                value = state.ingredientText,
+                modifier = Modifier.animateContentSize(),
+                value = ingredientText,
                 shape = CircleShape,
-                onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) }
+                onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) },
+                placeholder = {
+                    Text(text = stringResource(R.string.ingredient_name_placeholder))
+                },
+                singleLine = true,
+                supportingText = if(isBlankText)
+                { { Text(stringResource(R.string.add_name)) } } else null,
+                isError = isBlankText
             )
         }
     )

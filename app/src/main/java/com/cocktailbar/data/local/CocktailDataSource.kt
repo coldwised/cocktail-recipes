@@ -15,6 +15,7 @@ interface CocktailDataSource {
         description: String,
         recipe: String,
         ingredients: String,
+        image: String?
     )
 
     fun getCocktailImagesDir(): File

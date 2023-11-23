@@ -21,7 +21,7 @@ class RootComponent(
     private val cocktailsFactory:
         (ComponentContext, () -> Unit) -> CocktailsComponent,
     private val cocktailEditRootComponentFactory:
-        (ComponentContext, Cocktail?) -> CocktailEditRootComponent
+        (ComponentContext, Cocktail?, () -> Unit) -> CocktailEditRootComponent
 ) : IRootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<ChildConfig>()
@@ -52,7 +52,8 @@ class RootComponent(
                 IRootComponent.Child.CocktailRootEditChild(
                     cocktailEditRootComponentFactory(
                         componentContext,
-                        config.cocktail
+                        config.cocktail,
+                        TODO()
                     )
                 )
             }
@@ -60,7 +61,8 @@ class RootComponent(
                 IRootComponent.Child.CocktailRootEditChild(
                     cocktailEditRootComponentFactory(
                         componentContext,
-                        null
+                        null,
+                        TODO()
                     )
                 )
             }

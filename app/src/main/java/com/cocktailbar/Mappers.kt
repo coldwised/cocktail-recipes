@@ -9,6 +9,7 @@ fun CocktailEntity.toCocktail(): Cocktail {
         name = name,
         description = description,
         recipe = recipe,
-        ingredients = ingredients.split(',')
+        ingredients = ingredients.split(','),
+        image = image,
     )
 }

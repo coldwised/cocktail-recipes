@@ -3,7 +3,8 @@ CREATE TABLE cocktailEntity (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     recipe TEXT NOT NULL,
-    ingredients TEXT NOT NULL
+    ingredients TEXT NOT NULL,
+    image TEXT
 );
 
 getCocktails:
@@ -13,4 +14,4 @@ FROM cocktailEntity;
 addCocktail:
 INSERT OR REPLACE
 INTO cocktailEntity
-VALUES(?, ?, ?, ?, ?);
+VALUES(?, ?, ?, ?, ?, ?);

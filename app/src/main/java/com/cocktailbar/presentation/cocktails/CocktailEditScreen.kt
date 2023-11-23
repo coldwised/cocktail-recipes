@@ -67,6 +67,7 @@ fun CocktailEditScreen(
         bottomBar = {
             BottomBar(
                 modifier = maxWidthModifier.height(55.dp),
+                enabled = state.imageLoaderProgressPercentage == null && state.title.isNotBlank(),
                 saveLoading = state.saveLoading,
                 onSaveClick = { dispatch(SaveCocktail) }
             )
@@ -183,11 +184,13 @@ fun CocktailImage(
 fun BottomBar(
     modifier: Modifier,
     saveLoading: Boolean,
+    enabled: Boolean,
     onSaveClick: () -> Unit,
 ) {
     Button(
         modifier = modifier,
         shape = CircleShape,
+        enabled = enabled,
         onClick = onSaveClick
     ) {
         if (saveLoading) {

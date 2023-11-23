@@ -68,13 +68,15 @@ class CocktailDataSourceImpl(
         description: String,
         recipe: String,
         ingredients: String,
+        image: String?
     ) {
         queries.addCocktail(
             id = id,
             name = name,
             description = description,
             recipe = recipe,
-            ingredients = ingredients
+            ingredients = ingredients,
+            image = image
         )
     }
 }
