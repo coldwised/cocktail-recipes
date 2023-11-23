@@ -1,24 +1,36 @@
 package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.util.toStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import me.tatarka.inject.annotations.Assisted
+import me.tatarka.inject.annotations.Inject
 
+@Inject
 class CocktailEditRootComponent(
-    componentContext: ComponentContext
+    @Assisted componentContext: ComponentContext,
+    @Assisted cocktail: Cocktail?,
+    cocktailEditComponentFactory: (ComponentContext, Cocktail?, () -> Unit) -> CocktailEditComponent
 ): ComponentContext by componentContext, ICocktailEditRootComponent {
     private val slotNavigation = SlotNavigation<SlotConfig>()
-
+    override val cocktailEditComponent: ICocktailEditComponent = cocktailEditComponentFactory(
+        childContext("ICocktailEditComponent"),
+        cocktail,
+        { slotNavigation.activate(SlotConfig.CocktailIngredient) }
+    )
     @Parcelize
     private sealed interface SlotConfig : Parcelable {
         @Parcelize
-        data class CocktailIngredient(val cocktail: Cocktail) : SlotConfig
+        data object CocktailIngredient : SlotConfig
     }
 
     override val childSlot: StateFlow<ChildSlot<*, ICocktailEditRootComponent.SlotChild>> =
@@ -36,7 +48,11 @@ class CocktailEditRootComponent(
         return when(config) {
             is SlotConfig.CocktailIngredient -> {
                 ICocktailEditRootComponent.SlotChild.CocktailIngredient(
-                    CocktailIngredientComponent(componentContext)
+                    IngredientDialogComponent(
+                        componentContext = componentContext,
+                        dismissDialog = slotNavigation::dismiss,
+                        saveIngredient = { cocktailEditComponent.dispatch(SaveIngredientValue(it)) }
+                    )
                 )
             }
         }

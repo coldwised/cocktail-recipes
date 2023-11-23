@@ -7,4 +7,6 @@
     <string name="add_title">Add Title</string>
     <string name="optional_field">Optional field</string>
     <string name="ingredients">Ingredients</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
 </resources>

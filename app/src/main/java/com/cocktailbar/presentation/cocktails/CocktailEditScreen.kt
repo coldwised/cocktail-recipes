@@ -18,16 +18,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
@@ -36,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -50,7 +56,7 @@ import coil.request.ImageRequest
 import com.cocktailbar.R
 
 @Composable
-fun EditCocktailScreen(
+fun CocktailEditScreen(
     cocktailEditComponent: ICocktailEditComponent
 ) {
     val state = cocktailEditComponent.state.collectAsStateWithLifecycle().value
@@ -60,7 +66,7 @@ fun EditCocktailScreen(
         modifier = Modifier.padding(horizontal = 16.dp),
         bottomBar = {
             BottomBar(
-                modifier = maxWidthModifier.height(50.dp),
+                modifier = maxWidthModifier.height(55.dp),
                 saveLoading = state.saveLoading,
                 onSaveClick = { dispatch(SaveCocktail) }
             )
@@ -72,7 +78,9 @@ fun EditCocktailScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            Spacer(modifier = Modifier.height(64.dp))
+            val pictureVerticalSpacerModifier = remember { Modifier.height(64.dp) }
+            val verticalSpacerModifier = remember { Modifier.height(16.dp) }
+            Spacer(modifier = pictureVerticalSpacerModifier)
             val textFieldShape = remember { CircleShape }
             CocktailImage(
                 loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
@@ -80,7 +88,7 @@ fun EditCocktailScreen(
                 onPickerResult = { dispatch(OnPickerResult(it)) },
                 onCocktailPictureLoaderCompleted = { dispatch(OnCocktailPictureLoaderCompleted) }
             )
-            Spacer(modifier = Modifier.height(64.dp))
+            Spacer(modifier = pictureVerticalSpacerModifier)
             Title(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
@@ -89,7 +97,7 @@ fun EditCocktailScreen(
                     dispatch(ChangeTitleValue(it))
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = verticalSpacerModifier)
             Description(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
@@ -98,16 +106,20 @@ fun EditCocktailScreen(
                     dispatch(ChangeDescriptionValue(it))
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Ingredients()
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = verticalSpacerModifier)
+            Ingredients(
+                ingredients = state.ingredients,
+                onAddIngredientClick = { dispatch(OnAddIngredientClicked) },
+                { dispatch(RemoveIngredient(it)) }
+            )
+            Spacer(modifier = verticalSpacerModifier)
             Recipe(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
                 query = state.recipe,
                 onQueryChange = { dispatch(ChangeRecipeValue(it)) }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = verticalSpacerModifier)
         }
     }
 }
@@ -232,12 +244,45 @@ fun Description(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Ingredients(
+    ingredients: List<String>,
+    onAddIngredientClick: () -> Unit,
+    onRemoveIngredient: (Int) -> Unit
 ) {
     Text(
         text = stringResource(R.string.ingredients)
     )
-    FlowRow {
-        IconButton(onClick = { /*TODO*/ }) {
+    Spacer(Modifier.height(8.dp))
+    val flowRowModifier = Modifier.height(24.dp)
+    FlowRow(
+        verticalAlignment = CenterVertically
+    ) {
+        val iconButtonModifier = remember { Modifier.size(16.dp) }
+        val closeIcon = remember { Icons.Default.Close }
+        val circleShape = remember { CircleShape }
+        val labelSmallStyle = MaterialTheme.typography.labelSmall
+        val chipSpacerModifier = remember { Modifier.width(6.dp) }
+        ingredients.forEachIndexed { index, ingredient ->
+            AssistChip(
+                modifier = flowRowModifier,
+                onClick = {},
+                shape = circleShape,
+                trailingIcon = {
+                    IconButton(
+                        modifier = iconButtonModifier,
+                        onClick = { onRemoveIngredient(index) }
+                    ) {
+                        Icon(
+                            imageVector = closeIcon,
+                            contentDescription = null
+                        )
+                    }
+                },
+                label = { Text(text = ingredient, style = labelSmallStyle) }
+            )
+            Spacer(chipSpacerModifier)
+        }
+        IconButton(
+            modifier = Modifier.size(24.dp), onClick = onAddIngredientClick) {
             Icon(
                 imageVector = Icons.Default.AddCircle,
                 contentDescription = null

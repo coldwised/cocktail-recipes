@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.StateFlow
 interface ICocktailListComponent {
     val state: StateFlow<CocktailListState>
 
-    fun dispatch(cocktailsUiEvent: CocktailsUiEvent)
+    fun dispatch(cocktailsEvent: CocktailsEvent)
 }

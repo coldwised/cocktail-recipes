@@ -3,8 +3,8 @@ package com.cocktailbar.presentation
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
+import com.cocktailbar.presentation.cocktails.CocktailEditRootScreen
 import com.cocktailbar.presentation.cocktails.CocktailsScreen
-import com.cocktailbar.presentation.cocktails.EditCocktailScreen
 
 @Composable
 fun RootScreen(root: IRootComponent) {
@@ -15,8 +15,8 @@ fun RootScreen(root: IRootComponent) {
             is IRootComponent.Child.CocktailsChild -> {
                 CocktailsScreen(child.component)
             }
-            is IRootComponent.Child.CocktailEditChild -> {
-                EditCocktailScreen(child.component)
+            is IRootComponent.Child.CocktailRootEditChild -> {
+                CocktailEditRootScreen(child.component)
             }
         }
     }

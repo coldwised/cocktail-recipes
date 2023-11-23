@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface ICocktailEditRootComponent {
     val childSlot: StateFlow<ChildSlot<*, SlotChild>>
+    val cocktailEditComponent: ICocktailEditComponent
     sealed interface SlotChild {
-        data class CocktailIngredient(val component: ICocktailIngredientComponent): SlotChild
+        data class CocktailIngredient(val component: IIngredientDialogComponent): SlotChild
     }
 }

@@ -27,18 +27,18 @@ class CocktailListComponent(
     private val emptyState = CocktailListState()
 
     init {
-        dispatch(CocktailsUiEvent.LoadCocktails)
+        dispatch(CocktailsEvent.LoadCocktails)
     }
 
-    override fun dispatch(cocktailsUiEvent: CocktailsUiEvent) {
-        reduce(cocktailsUiEvent)
+    override fun dispatch(cocktailsEvent: CocktailsEvent) {
+        reduce(cocktailsEvent)
     }
 
-    private fun reduce(event: CocktailsUiEvent) {
+    private fun reduce(event: CocktailsEvent) {
         componentScope.launch {
             val stateFlow = _state
             when(event) {
-                is CocktailsUiEvent.LoadCocktails -> {
+                is CocktailsEvent.LoadCocktails -> {
                     stateFlow.update { emptyState }
                     getCocktailsUseCase().collect { cocktails ->
                         stateFlow.update {
@@ -46,10 +46,10 @@ class CocktailListComponent(
                         }
                     }
                 }
-                is CocktailsUiEvent.OnCocktailClicked -> {
+                is CocktailsEvent.OnCocktailClicked -> {
                     navigateToCocktailDetails(event.cocktail)
                 }
-                is CocktailsUiEvent.DismissChildSlot -> {
+                is CocktailsEvent.DismissChildSlot -> {
                 }
             }
         }

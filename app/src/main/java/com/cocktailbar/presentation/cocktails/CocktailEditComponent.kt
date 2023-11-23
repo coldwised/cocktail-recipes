@@ -20,6 +20,7 @@ import me.tatarka.inject.annotations.Inject
 class CocktailEditComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted cocktail: Cocktail?,
+    @Assisted private val openIngredientDialog: () -> Unit,
     private val addCocktailUseCase: AddCocktailUseCase,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
     private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase
@@ -90,6 +91,18 @@ class CocktailEditComponent(
 
                 is OnCocktailPictureLoaderCompleted -> {
                     stateFlow.update { it.copy(imageLoaderProgressPercentage = null) }
+                }
+
+                is SaveIngredientValue -> {
+                    stateFlow.update { it.copy(ingredients = it.ingredients.plus(event.ingredient)) }
+                }
+
+                is OnAddIngredientClicked -> {
+                    openIngredientDialog()
+                }
+
+                is RemoveIngredient -> {
+                    stateFlow.update { it.copy(ingredients = it.ingredients.filterIndexed { index, _ -> index == event.index })}
                 }
             }
         }
