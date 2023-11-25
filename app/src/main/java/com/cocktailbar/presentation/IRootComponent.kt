@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 interface IRootComponent {
     val childStack: StateFlow<ChildStack<*, Child>>
 
-    val cocktailsComponent: ICocktailsComponent
-
     sealed interface Child {
         data class CocktailsChild(val component: ICocktailsComponent) : Child
         data class CocktailRootEditChild(val component: ICocktailEditRootComponent) : Child

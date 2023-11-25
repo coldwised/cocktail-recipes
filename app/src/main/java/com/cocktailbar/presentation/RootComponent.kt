@@ -1,7 +1,6 @@
 package com.cocktailbar.presentation
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
@@ -22,7 +21,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class RootComponent(
     @Assisted componentContext: ComponentContext,
-    cocktailsFactory:
+    private val cocktailsFactory:
         (ComponentContext, () -> Unit) -> CocktailsComponent,
     private val cocktailEditRootComponentFactory:
         (
@@ -34,10 +33,6 @@ class RootComponent(
 ) : IRootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<ChildConfig>()
-    override val cocktailsComponent: ICocktailsComponent = cocktailsFactory(
-        childContext(key = "cocktailsComponent"),
-        { navigation.push(ChildConfig.CocktailCreate) }
-    )
 
     override val childStack: StateFlow<ChildStack<*, IRootComponent.Child>> =
         childStack(
@@ -54,7 +49,10 @@ class RootComponent(
         return when (config) {
             is ChildConfig.Cocktails -> {
                 IRootComponent.Child.CocktailsChild(
-                    cocktailsComponent
+                    cocktailsFactory(
+                        componentContext,
+                        { navigation.push(ChildConfig.CocktailCreate) }
+                    )
                 )
             }
 
@@ -65,7 +63,7 @@ class RootComponent(
                         config.cocktail,
                         {
                             navigation.pop {
-                                cocktailsComponent
+                                (childStack.value.active.instance as ICocktailsComponent)
                                     .cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
                             }
                         },
@@ -81,8 +79,8 @@ class RootComponent(
                         null,
                         {
                             navigation.pop {
-                                cocktailsComponent
-                                    .cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+                                (childStack.value.active.instance as IRootComponent.Child.CocktailsChild)
+                                    .component.cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
                             }
                         },
                         { navigation.pop() }
