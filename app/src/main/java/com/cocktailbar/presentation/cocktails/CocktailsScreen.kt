@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,14 +31,12 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.cocktailbar.util.toPx
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
-    val childStack = cocktailsComponent.childStack.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val fabSize = remember { 80.dp }
@@ -59,7 +55,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     }
                 }
                 if (child != null) {
-                    when(val childInstance = child.instance) {
+                    when (val childInstance = child.instance) {
                         is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
                             CocktailDetails(childInstance.component)
                         }
@@ -68,19 +64,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
             },
             sheetShape = customShapeWithCutout,
         ) { paddingValues ->
-            Children(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .statusBarsPadding(),
-                stack = childStack,
-            ) {
-                when(val child = it.instance) {
-                    is ICocktailsComponent.Child.CocktailList -> {
-                        CocktailListScreen(child.component)
-                    }
-                }
-            }
+            CocktailListScreen(cocktailsComponent.cocktailListComponent)
         }
         Column(modifier = Modifier.align(BottomCenter), horizontalAlignment = CenterHorizontally) {
             FloatingActionButton(
@@ -113,7 +97,7 @@ private fun customShapeWithCutout(cutoutRadius: Float, cornerRadius: Float) = ob
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            lineTo(x = (size.width/2) - cutoutRadius, y = 0f)
+            lineTo(x = (size.width / 2) - cutoutRadius, y = 0f)
             arcTo(
                 rect = Rect(
                     left = size.width / 2 - cutoutRadius,
@@ -128,7 +112,7 @@ private fun customShapeWithCutout(cutoutRadius: Float, cornerRadius: Float) = ob
             lineTo(x = size.width - cornerRadius, y = 0f)
             arcTo(
                 rect = Rect(
-                    offset = Offset(size.width -cornerRadius, 0f),
+                    offset = Offset(size.width - cornerRadius, 0f),
                     size = Size(cornerRadius, cornerRadius)
                 ),
                 startAngleDegrees = 270f,

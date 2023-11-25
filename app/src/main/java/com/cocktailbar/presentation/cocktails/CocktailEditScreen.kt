@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,10 +67,11 @@ fun CocktailEditScreen(
         modifier = Modifier.padding(horizontal = 16.dp),
         bottomBar = {
             BottomBar(
-                modifier = maxWidthModifier.height(55.dp),
                 enabled = state.imageLoaderProgressPercentage == null && state.title.isNotBlank(),
                 saveLoading = state.saveLoading,
-                onSaveClick = { dispatch(SaveCocktail) }
+                cancelLoading = state.removePictureLoading,
+                onSaveClick = { dispatch(SaveCocktail) },
+                onCancelClick = { dispatch(OnCancelClick) }
             )
         }
     ) { paddingValues ->
@@ -182,21 +184,49 @@ fun CocktailImage(
 
 @Composable
 fun BottomBar(
-    modifier: Modifier,
     saveLoading: Boolean,
+    cancelLoading: Boolean,
     enabled: Boolean,
     onSaveClick: () -> Unit,
+    onCancelClick: () -> Unit
 ) {
-    Button(
-        modifier = modifier,
-        shape = CircleShape,
-        enabled = enabled,
-        onClick = onSaveClick
-    ) {
-        if (saveLoading) {
-            CircularProgressIndicator()
-        } else {
-            Text(text = stringResource(R.string.save_button))
+    Column {
+        val buttonModifier = remember { Modifier.fillMaxWidth().height(55.dp) }
+        val progressBarModifier = remember { Modifier.size(20.dp) }
+        Button(
+            modifier = buttonModifier,
+            shape = CircleShape,
+            enabled = enabled,
+            onClick = onSaveClick
+        ) {
+            if (saveLoading) {
+                CircularProgressIndicator(
+                    modifier = progressBarModifier,
+                    strokeWidth = 3.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(text = stringResource(R.string.save_button))
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Button(
+            modifier = buttonModifier,
+            shape = CircleShape,
+            onClick = onCancelClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+            )
+        ) {
+            if (cancelLoading) {
+                CircularProgressIndicator(
+                    modifier = progressBarModifier,
+                    strokeWidth = 3.dp,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            } else {
+                Text(text = stringResource(R.string.cancel))
+            }
         }
     }
 }
@@ -285,7 +315,8 @@ fun Ingredients(
             Spacer(chipSpacerModifier)
         }
         IconButton(
-            modifier = Modifier.size(24.dp), onClick = onAddIngredientClick) {
+            modifier = Modifier.size(24.dp), onClick = onAddIngredientClick
+        ) {
             Icon(
                 imageVector = Icons.Default.AddCircle,
                 contentDescription = null

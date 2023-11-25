@@ -18,7 +18,7 @@ class CocktailListComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted private val navigateToCocktailDetails: (Cocktail) -> Unit,
     private val getCocktailsUseCase: GetCocktailsUseCase,
-): ComponentContext by componentContext, ICocktailListComponent {
+) : ComponentContext by componentContext, ICocktailListComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
     private val _state = MutableStateFlow(CocktailListState())
@@ -37,7 +37,7 @@ class CocktailListComponent(
     private fun reduce(event: CocktailsEvent) {
         componentScope.launch {
             val stateFlow = _state
-            when(event) {
+            when (event) {
                 is CocktailsEvent.LoadCocktails -> {
                     stateFlow.update { emptyState }
                     getCocktailsUseCase().collect { cocktails ->
@@ -46,9 +46,11 @@ class CocktailListComponent(
                         }
                     }
                 }
+
                 is CocktailsEvent.OnCocktailClicked -> {
                     navigateToCocktailDetails(event.cocktail)
                 }
+
                 is CocktailsEvent.DismissChildSlot -> {
                 }
             }

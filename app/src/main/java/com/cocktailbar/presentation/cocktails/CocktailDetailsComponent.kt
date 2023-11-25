@@ -10,7 +10,7 @@ class CocktailDetailsComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted val cocktail: Cocktail,
     @Assisted private val navigateToEditCocktail: (Cocktail) -> Unit
-): ICocktailDetailsComponent, ComponentContext by componentContext {
+) : ICocktailDetailsComponent, ComponentContext by componentContext {
 
     fun onEditClick() {
         navigateToEditCocktail(cocktail)

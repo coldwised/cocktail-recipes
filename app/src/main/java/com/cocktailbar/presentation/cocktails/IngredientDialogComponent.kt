@@ -9,7 +9,7 @@ class IngredientDialogComponent(
     componentContext: ComponentContext,
     private val dismissDialog: () -> Unit,
     private val saveIngredient: (String) -> Unit
-): ComponentContext by componentContext, IIngredientDialogComponent {
+) : ComponentContext by componentContext, IIngredientDialogComponent {
     private val _state = MutableStateFlow(IngredientDialogState())
     override val state = _state.asStateFlow()
     override fun dispatch(ingredientDialogEvent: IngredientDialogEvent) {
@@ -18,15 +18,17 @@ class IngredientDialogComponent(
 
     private fun reduce(event: IngredientDialogEvent) {
         val stateFlow = _state
-        when(event) {
+        when (event) {
             IngredientDialogEvent.OnDismiss -> {
                 dismissDialog()
             }
+
             is IngredientDialogEvent.OnIngredientTextChanged -> {
                 stateFlow.update {
                     it.copy(ingredientText = event.value)
                 }
             }
+
             IngredientDialogEvent.OnSaveIngredient -> {
                 saveIngredient(stateFlow.value.ingredientText)
                 dismissDialog()

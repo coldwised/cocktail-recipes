@@ -25,7 +25,8 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
     val buttonModifier = remember {
         Modifier
             .fillMaxWidth()
-            .height(55.dp) }
+            .height(55.dp)
+    }
     val ingredientText = state.ingredientText
     val isBlankText = ingredientText.isBlank()
     AlertDialog(
@@ -64,8 +65,9 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
                     Text(text = stringResource(R.string.ingredient_name_placeholder))
                 },
                 singleLine = true,
-                supportingText = if(isBlankText)
-                { { Text(stringResource(R.string.add_name)) } } else null,
+                supportingText = if (isBlankText) {
+                    { Text(stringResource(R.string.add_name)) }
+                } else null,
                 isError = isBlankText
             )
         }

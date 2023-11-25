@@ -21,7 +21,8 @@ class CocktailEditComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted cocktail: Cocktail?,
     @Assisted private val openIngredientDialog: () -> Unit,
-    @Assisted private val navigateBackWithRefresh: () -> Unit,
+    @Assisted private val navigateToCocktailsWithRefresh: () -> Unit,
+    @Assisted private val navigateBack: () -> Unit,
     private val addCocktailUseCase: AddCocktailUseCase,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
     private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase,
@@ -53,7 +54,15 @@ class CocktailEditComponent(
                         )
                     )
                     stateFlow.update { it.copy(saveLoading = false) }
-                    navigateBackWithRefresh()
+                    navigateToCocktailsWithRefresh()
+                }
+
+                is OnCancelClick -> {
+                    stateFlow.value.image?.let { image ->
+                        stateFlow.update { it.copy(removePictureLoading = true, image = null) }
+                        deleteCocktailImageUseCase(image)
+                    }
+                    navigateBack()
                 }
 
                 is ChangeTitleValue -> {
@@ -83,9 +92,13 @@ class CocktailEditComponent(
                                     imageLoaderProgressPercentage = result.progress
                                 )
                             }
+
                             is DownloadState.Finished -> {
                                 stateFlow.update {
-                                    it.copy(image = result.value, imageLoaderProgressPercentage = 100)
+                                    it.copy(
+                                        image = result.value,
+                                        imageLoaderProgressPercentage = 100
+                                    )
                                 }
                             }
                         }
@@ -105,7 +118,7 @@ class CocktailEditComponent(
                 }
 
                 is RemoveIngredient -> {
-                    stateFlow.update { it.copy(ingredients = it.ingredients.filterIndexed { index, _ -> index != event.index })}
+                    stateFlow.update { it.copy(ingredients = it.ingredients.filterIndexed { index, _ -> index != event.index }) }
                 }
             }
         }

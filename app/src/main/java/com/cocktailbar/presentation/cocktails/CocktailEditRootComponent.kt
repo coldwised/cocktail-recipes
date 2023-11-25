@@ -19,20 +19,25 @@ import me.tatarka.inject.annotations.Inject
 class CocktailEditRootComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted cocktail: Cocktail?,
-    @Assisted navigateBackWithRefresh: () -> Unit,
+    @Assisted navigateToCocktailsWithRefresh: () -> Unit,
+    @Assisted navigateBack: () -> Unit,
     cocktailEditComponentFactory: (
         ComponentContext,
         Cocktail?,
         () -> Unit,
-        () -> Unit) -> CocktailEditComponent
-): ComponentContext by componentContext, ICocktailEditRootComponent {
+        () -> Unit,
+        () -> Unit
+    ) -> CocktailEditComponent
+) : ComponentContext by componentContext, ICocktailEditRootComponent {
     private val slotNavigation = SlotNavigation<SlotConfig>()
     override val cocktailEditComponent: ICocktailEditComponent = cocktailEditComponentFactory(
         childContext("ICocktailEditComponent"),
         cocktail,
         { slotNavigation.activate(SlotConfig.CocktailIngredient) },
-        { navigateBackWithRefresh() }
+        { navigateToCocktailsWithRefresh() },
+        { navigateBack() }
     )
+
     @Parcelize
     private sealed interface SlotConfig : Parcelable {
         @Parcelize
@@ -51,7 +56,7 @@ class CocktailEditRootComponent(
         config: SlotConfig,
         componentContext: ComponentContext
     ): ICocktailEditRootComponent.SlotChild {
-        return when(config) {
+        return when (config) {
             is SlotConfig.CocktailIngredient -> {
                 ICocktailEditRootComponent.SlotChild.CocktailIngredient(
                     IngredientDialogComponent(
