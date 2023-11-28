@@ -153,7 +153,7 @@ fun CocktailImage(
                 .fillMaxWidth()
                 .padding(horizontal = 64.dp)
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(60.dp))
+                .clip(RoundedCornerShape(54.dp))
                 .clickable(
                     enabled = loaderProgress == null,
                     onClick = {

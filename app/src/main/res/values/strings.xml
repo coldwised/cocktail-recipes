@@ -12,4 +12,6 @@
     <string name="add_ingredient_title">Add ingredient</string>
     <string name="ingredient_name_placeholder">Ingredient\'s name</string>
     <string name="add_name">Add name</string>
+    <string name="recipe">Recipe:</string>
+    <string name="edit">Edit</string>
 </resources>

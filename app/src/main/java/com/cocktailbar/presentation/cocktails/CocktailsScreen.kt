@@ -1,5 +1,6 @@
 package com.cocktailbar.presentation.cocktails
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,11 +14,12 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -39,9 +41,14 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val fabSize = remember { 80.dp }
+    val fabSize by animateDpAsState(
+        targetValue = if(sheetState.targetValue == SheetValue.Expanded) {
+            0.dp
+        } else 80.dp,
+        label = "FAB"
+    )
     val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
-    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, 300f) }
+    val customShapeWithCutout = customShapeWithCutout(fabCutoutRadiusPx, 300f)
     Box(modifier = Modifier.fillMaxSize()) {
         BottomSheetScaffold(
             scaffoldState = sheetScaffoldState,
@@ -51,7 +58,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     if (child == null) {
                         sheetState.partialExpand()
                     } else {
-                        sheetState.show()
+                        sheetState.expand()
                     }
                 }
                 if (child != null) {
@@ -62,6 +69,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     }
                 }
             },
+            sheetDragHandle = null,
             sheetShape = customShapeWithCutout,
         ) { paddingValues ->
             CocktailListScreen(cocktailsComponent.cocktailListComponent)

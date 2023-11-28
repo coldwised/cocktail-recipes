@@ -48,7 +48,9 @@ class CocktailListComponent(
                 }
 
                 is CocktailsEvent.OnCocktailClicked -> {
-                    navigateToCocktailDetails(event.cocktail)
+                    val cocktail = event.cocktail
+                    stateFlow.update { it.copy(clickedCocktailImage = cocktail.image) }
+                    navigateToCocktailDetails(cocktail)
                 }
 
                 is CocktailsEvent.DismissChildSlot -> {

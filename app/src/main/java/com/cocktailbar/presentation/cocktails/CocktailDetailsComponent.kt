@@ -8,11 +8,11 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class CocktailDetailsComponent(
     @Assisted componentContext: ComponentContext,
-    @Assisted val cocktail: Cocktail,
+    @Assisted override val cocktail: Cocktail,
     @Assisted private val navigateToEditCocktail: (Cocktail) -> Unit
 ) : ICocktailDetailsComponent, ComponentContext by componentContext {
 
-    fun onEditClick() {
+    override fun onEditClick() {
         navigateToEditCocktail(cocktail)
     }
 }
