@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +18,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +64,12 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else if (state.cocktails.isNotEmpty()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.my_cocktails),
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
                 CocktailsGrid(
                     cocktails = state.cocktails,
                     bottomPadding = bottomPadding,
@@ -63,6 +78,8 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
                     }
                 )
             }
+        } else {
+            CocktailListPlaceholder(bottomPadding)
         }
     }
     val clickedCocktailImage = state.clickedCocktailImage
@@ -74,7 +91,7 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
     AnimatedVisibility(
         visible = imageExpanded,
         enter = slideInVertically(
-            tween(500)
+            tween(400)
         ) + fadeIn(tween(500)),
         exit = slideOutVertically(
             tween(700)
@@ -86,6 +103,45 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
             contentScale = ContentScale.Crop,
             contentDescription = null
         )
+    }
+}
+
+@Composable
+fun CocktailListPlaceholder(bottomPadding: Dp) {
+    Column(
+        modifier = Modifier
+            .padding(bottom = bottomPadding)
+            .fillMaxSize()
+            .padding(horizontal = 38.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val tipColor = MaterialTheme.colorScheme.outlineVariant
+        Spacer(modifier = Modifier.height(33.dp))
+        Image(
+            modifier = Modifier.size(283.dp),
+            painter = painterResource(id = R.drawable.summer_holidays),
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        Text(
+            text = stringResource(R.string.my_cocktails),
+            style = MaterialTheme.typography.headlineLarge
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Text(
+            modifier = Modifier.width(130.dp),
+            text = stringResource(R.string.add_first_cocktail),
+            textAlign = TextAlign.Center,
+            color = tipColor
+        )
+        Spacer(modifier = Modifier.height(36.dp))
+        Icon(
+            painter = painterResource(id = R.drawable.arrow_down),
+            contentDescription = null,
+            tint = tipColor
+        )
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -145,6 +201,7 @@ fun CocktailItem(
                 text = cocktail.name,
                 color = Color.White,
                 fontSize = 18.sp,
+                lineHeight = 24.sp
             )
             Spacer(modifier = Modifier.height(34.dp))
         }

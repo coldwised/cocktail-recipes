@@ -23,6 +23,7 @@ class CocktailsComponent(
         ComponentContext,
         Cocktail,
         (Cocktail) -> Unit,
+        () -> Unit,
         () -> Unit
     ) -> CocktailDetailsComponent,
     cocktailListFactory: (
@@ -66,8 +67,15 @@ class CocktailsComponent(
                         slotConfig.cocktail,
                         { navigateToEditCocktailScreen(slotConfig.cocktail) },
                         {
-                            cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
-                            slotNavigation.dismiss()
+                            slotNavigation.dismiss {
+                                cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
+                            }
+                        },
+                        {
+                            slotNavigation.dismiss {
+                                cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
+                                cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+                            }
                         }
                     )
                 )

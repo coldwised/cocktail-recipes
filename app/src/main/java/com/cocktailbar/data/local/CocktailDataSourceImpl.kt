@@ -61,6 +61,10 @@ class CocktailDataSourceImpl(
 
     override fun getCocktailImagesDir() = cocktailImagesDir
 
+    override suspend fun deleteCocktail(cocktailId: Long) {
+        queries.deleteCocktail(cocktailId)
+    }
+
 
     override suspend fun addCocktail(
         id: Long?,

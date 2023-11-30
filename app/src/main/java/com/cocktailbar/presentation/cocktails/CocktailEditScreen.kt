@@ -29,9 +29,11 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -63,7 +65,6 @@ fun CocktailEditScreen(
     val dispatch = cocktailEditComponent::dispatch
     val maxWidthModifier = remember { Modifier.fillMaxWidth() }
     Scaffold(
-        modifier = Modifier.padding(horizontal = 16.dp),
         bottomBar = {
             BottomBar(
                 enabled = state.imageLoaderProgressPercentage == null && state.title.isNotBlank(),
@@ -76,14 +77,14 @@ fun CocktailEditScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
         ) {
             val pictureVerticalSpacerModifier = remember { Modifier.height(64.dp) }
             val verticalSpacerModifier = remember { Modifier.height(16.dp) }
             Spacer(modifier = pictureVerticalSpacerModifier)
-            val textFieldShape = remember { CircleShape }
+            val textFieldShape = remember { RoundedCornerShape(50.dp) }
             CocktailImage(
                 loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
                 image = state.image,
@@ -122,6 +123,7 @@ fun CocktailEditScreen(
                 onQueryChange = { dispatch(ChangeRecipeValue(it)) }
             )
             Spacer(modifier = verticalSpacerModifier)
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }
@@ -145,7 +147,7 @@ fun CocktailImage(
                 .crossfade(true)
                 .memoryCacheKey(image?.split('/')?.last()?.substringBefore('.'))
                 .build(),
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.Crop
         )
         Image(
             modifier = Modifier
@@ -162,7 +164,7 @@ fun CocktailImage(
                     }
                 ),
             painter = coilPainter,
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             contentDescription = null
         )
         if (image != null && loaderProgress != null) {
@@ -188,7 +190,9 @@ fun BottomBar(
     onSaveClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
-    Column {
+    Column(
+        Modifier.padding(horizontal = 16.dp)
+    ) {
         val buttonModifier = remember {
             Modifier
                 .fillMaxWidth()
@@ -207,7 +211,10 @@ fun BottomBar(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text(text = stringResource(R.string.save_button))
+                Text(
+                    text = stringResource(R.string.save_button),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
@@ -215,6 +222,7 @@ fun BottomBar(
             modifier = buttonModifier,
             shape = CircleShape,
             onClick = onCancelClick,
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background),
             border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary)
         ) {
             if (cancelLoading) {
@@ -224,9 +232,13 @@ fun BottomBar(
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             } else {
-                Text(text = stringResource(R.string.cancel))
+                Text(
+                    text = stringResource(R.string.cancel),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             }
         }
+        Spacer(Modifier.height(26.dp))
     }
 }
 
@@ -320,7 +332,8 @@ fun Ingredients(
             Spacer(chipSpacerModifier)
         }
         IconButton(
-            modifier = Modifier.size(24.dp), onClick = onAddIngredientClick
+            modifier = Modifier.size(24.dp), onClick = onAddIngredientClick,
+            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
         ) {
             Icon(
                 imageVector = Icons.Default.AddCircle,

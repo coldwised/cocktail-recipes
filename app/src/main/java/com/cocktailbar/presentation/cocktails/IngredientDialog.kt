@@ -1,11 +1,13 @@
 package com.cocktailbar.presentation.cocktails
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,9 +36,13 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
         confirmButton = {
             OutlinedButton(
                 modifier = buttonModifier,
+                border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary),
                 onClick = { dispatch(IngredientDialogEvent.OnDismiss) }
             ) {
-                Text(stringResource(R.string.cancel))
+                Text(
+                    text = stringResource(R.string.cancel),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             }
         },
         dismissButton = {
@@ -45,21 +51,25 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
                 onClick = { dispatch(IngredientDialogEvent.OnSaveIngredient) },
                 enabled = !isBlankText
             ) {
-                Text(stringResource(R.string.add))
+                Text(
+                    text = stringResource(R.string.add),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             }
         },
         title = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = stringResource(R.string.add_ingredient_title)
+                text = stringResource(R.string.add_ingredient_title),
+                style = MaterialTheme.typography.headlineMedium
             )
         },
         text = {
             OutlinedTextField(
                 modifier = Modifier.animateContentSize(),
                 value = ingredientText,
-                shape = CircleShape,
+                shape = RoundedCornerShape(50.dp),
                 onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) },
                 placeholder = {
                     Text(text = stringResource(R.string.ingredient_name_placeholder))

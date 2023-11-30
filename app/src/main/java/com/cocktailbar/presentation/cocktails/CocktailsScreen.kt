@@ -15,6 +15,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -44,7 +46,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    var showFAB by remember { mutableStateOf(true) }
+    var showFAB by rememberSaveable { mutableStateOf(true) }
     val fabSize by animateDpAsState(
         targetValue = if(!showFAB) {
             0.dp
@@ -57,6 +59,9 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     Box(modifier = Modifier.fillMaxSize()) {
         BottomSheetScaffold(
             scaffoldState = sheetScaffoldState,
+            sheetContainerColor = MaterialTheme.colorScheme.background,
+            sheetTonalElevation = 1.dp,
+            sheetShadowElevation = 6.dp,
             sheetContent = {
                 val child = childSlot.child
                 LaunchedEffect(child == null) {

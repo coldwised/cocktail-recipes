@@ -11,6 +11,9 @@ getCocktails:
 SELECT *
 FROM cocktailEntity;
 
+deleteCocktail:
+DELETE FROM cocktailEntity WHERE id = ?;
+
 addCocktail:
 INSERT OR REPLACE
 INTO cocktailEntity
