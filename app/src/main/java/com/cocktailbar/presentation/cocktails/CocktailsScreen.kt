@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -14,12 +15,14 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -41,14 +44,16 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+    var showFAB by remember { mutableStateOf(true) }
     val fabSize by animateDpAsState(
-        targetValue = if(sheetState.targetValue == SheetValue.Expanded) {
+        targetValue = if(!showFAB) {
             0.dp
         } else 80.dp,
         label = "FAB"
     )
     val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
-    val customShapeWithCutout = customShapeWithCutout(fabCutoutRadiusPx, 300f)
+    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, 300f) }
+    val customShape = remember { customShapeWithCutout(0f, 300f) }
     Box(modifier = Modifier.fillMaxSize()) {
         BottomSheetScaffold(
             scaffoldState = sheetScaffoldState,
@@ -56,23 +61,31 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                 val child = childSlot.child
                 LaunchedEffect(child == null) {
                     if (child == null) {
+                        showFAB = true
                         sheetState.partialExpand()
                     } else {
+                        showFAB = false
                         sheetState.expand()
                     }
                 }
-                if (child != null) {
-                    when (val childInstance = child.instance) {
-                        is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
-                            CocktailDetails(childInstance.component)
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(478.dp)) {
+                    if (child != null) {
+                        when (val childInstance = child.instance) {
+                            is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
+                                CocktailDetails(childInstance.component)
+                            }
                         }
                     }
                 }
             },
+            sheetSwipeEnabled = false,
             sheetDragHandle = null,
-            sheetShape = customShapeWithCutout,
+            sheetShape = if(showFAB) customShapeWithCutout else customShape,
         ) { paddingValues ->
-            CocktailListScreen(cocktailsComponent.cocktailListComponent)
+            CocktailListScreen(cocktailsComponent.cocktailListComponent, paddingValues.calculateBottomPadding())
         }
         Column(modifier = Modifier.align(BottomCenter), horizontalAlignment = CenterHorizontally) {
             FloatingActionButton(
@@ -105,19 +118,23 @@ private fun customShapeWithCutout(cutoutRadius: Float, cornerRadius: Float) = ob
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            lineTo(x = (size.width / 2) - cutoutRadius, y = 0f)
-            arcTo(
-                rect = Rect(
-                    left = size.width / 2 - cutoutRadius,
-                    top = -cutoutRadius,
-                    right = size.width / 2 + cutoutRadius,
-                    bottom = cutoutRadius
-                ),
-                startAngleDegrees = 180.0f,
-                sweepAngleDegrees = -180f,
-                forceMoveTo = false
-            )
-            lineTo(x = size.width - cornerRadius, y = 0f)
+            if(cutoutRadius > 0f) {
+                lineTo(x = (size.width / 2) - cutoutRadius, y = 0f)
+                arcTo(
+                    rect = Rect(
+                        left = size.width / 2 - cutoutRadius,
+                        top = -cutoutRadius,
+                        right = size.width / 2 + cutoutRadius,
+                        bottom = cutoutRadius
+                    ),
+                    startAngleDegrees = 180.0f,
+                    sweepAngleDegrees = -180f,
+                    forceMoveTo = false
+                )
+                lineTo(x = size.width - cornerRadius, y = 0f)
+            } else {
+                lineTo(x = size.width, y = 0f)
+            }
             arcTo(
                 rect = Rect(
                     offset = Offset(size.width - cornerRadius, 0f),

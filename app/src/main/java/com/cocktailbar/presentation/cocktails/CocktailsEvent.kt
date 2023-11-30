@@ -4,6 +4,6 @@ import com.cocktailbar.domain.model.Cocktail
 
 sealed interface CocktailsEvent {
     data object LoadCocktails : CocktailsEvent
-    data object DismissChildSlot : CocktailsEvent
-    data class OnCocktailClicked(val cocktail: Cocktail) : CocktailsEvent
+    data object OnDismissCocktailDetails : CocktailsEvent
+    data class OnCocktailClicked(val cocktail: Cocktail, val clickedCocktailImage: Any) : CocktailsEvent
 }

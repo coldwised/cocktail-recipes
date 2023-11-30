@@ -11,5 +11,7 @@ interface ICocktailsComponent {
         data class CocktailDetailsChild(val component: ICocktailDetailsComponent) : SlotChild
     }
 
+    fun dismissCocktailDetails()
+
     fun navigateToCreateCocktail()
 }

@@ -5,7 +5,7 @@ import com.cocktailbar.domain.model.Cocktail
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class AddCocktailUseCase(
+class SaveCocktailUseCase(
     private val repository: CocktailRepository
 ) {
     suspend operator fun invoke(cocktail: Cocktail) {

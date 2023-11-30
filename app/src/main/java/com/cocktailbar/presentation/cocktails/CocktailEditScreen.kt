@@ -5,8 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,11 +29,11 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -161,8 +160,7 @@ fun CocktailImage(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     }
-                )
-                .background(Color.LightGray),
+                ),
             painter = coilPainter,
             contentScale = ContentScale.FillBounds,
             contentDescription = null
@@ -191,7 +189,10 @@ fun BottomBar(
     onCancelClick: () -> Unit
 ) {
     Column {
-        val buttonModifier = remember { Modifier.fillMaxWidth().height(55.dp) }
+        val buttonModifier = remember {
+            Modifier
+                .fillMaxWidth()
+                .height(55.dp) }
         val progressBarModifier = remember { Modifier.size(20.dp) }
         Button(
             modifier = buttonModifier,
@@ -210,13 +211,11 @@ fun BottomBar(
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
-        Button(
+        OutlinedButton(
             modifier = buttonModifier,
             shape = CircleShape,
             onClick = onCancelClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-            )
+            border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary)
         ) {
             if (cancelLoading) {
                 CircularProgressIndicator(
@@ -246,6 +245,9 @@ fun Title(
         placeholder = {
             Text(text = stringResource(R.string.cocktail_name))
         },
+        label = {
+            Text(stringResource(R.string.title))
+        },
         supportingText = {
             Text(stringResource(R.string.add_title))
         },
@@ -270,7 +272,10 @@ fun Description(
         },
         supportingText = {
             Text(stringResource(R.string.optional_field))
-        }
+        },
+        label = {
+            Text(stringResource(R.string.description))
+        },
     )
 }
 
@@ -342,6 +347,9 @@ fun Recipe(
         },
         supportingText = {
             Text(stringResource(R.string.optional_field))
-        }
+        },
+        label = {
+            Text(stringResource(R.string.recipe))
+        },
     )
 }

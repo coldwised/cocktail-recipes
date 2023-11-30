@@ -2,7 +2,7 @@ package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
 import com.cocktailbar.domain.model.Cocktail
-import com.cocktailbar.domain.use_case.AddCocktailUseCase
+import com.cocktailbar.domain.use_case.SaveCocktailUseCase
 import com.cocktailbar.domain.use_case.DeleteCocktailImageUseCase
 import com.cocktailbar.domain.use_case.SaveCocktailImageUseCase
 import com.cocktailbar.util.DownloadState
@@ -19,16 +19,23 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class CocktailEditComponent(
     @Assisted componentContext: ComponentContext,
-    @Assisted cocktail: Cocktail?,
+    @Assisted private val cocktail: Cocktail?,
     @Assisted private val openIngredientDialog: () -> Unit,
     @Assisted private val navigateToCocktailsWithRefresh: () -> Unit,
     @Assisted private val navigateBack: () -> Unit,
-    private val addCocktailUseCase: AddCocktailUseCase,
+    private val saveCocktailUseCase: SaveCocktailUseCase,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
     private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase,
 ) : ComponentContext by componentContext, ICocktailEditComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
-    private val _state = MutableStateFlow(CocktailEditState())
+    private val _state = MutableStateFlow(
+        cocktail?.let { CocktailEditState(
+            image = it.image,
+            title = it.name,
+            description = it.description,
+            recipe = it.recipe,
+            ingredients = it.ingredients,
+        ) } ?: CocktailEditState())
 
     override val state = _state.asStateFlow()
 
@@ -43,9 +50,9 @@ class CocktailEditComponent(
                 is SaveCocktail -> {
                     stateFlow.update { it.copy(saveLoading = true) }
                     val state = stateFlow.value
-                    addCocktailUseCase(
+                    saveCocktailUseCase(
                         Cocktail(
-                            id = null,
+                            id = cocktail?.id,
                             name = state.title,
                             description = state.description,
                             recipe = state.recipe,

@@ -23,7 +23,6 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
     val cocktail = cocktailDetails.cocktail
     Column(
         modifier = Modifier
-            .height(478.dp)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -35,7 +34,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
             Divider(Modifier.width(16.dp))
         }
         cocktail.recipe.takeIf { it.isNotBlank() }?.let {
-            Text(stringResource(R.string.recipe))
+            Text(stringResource(R.string.recipe_colon))
             Text(it)
         }
         Button(

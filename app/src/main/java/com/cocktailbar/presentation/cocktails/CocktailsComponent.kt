@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.util.toStateFlow
@@ -17,15 +18,16 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class CocktailsComponent(
     @Assisted componentContext: ComponentContext,
-    @Assisted private val navigateToCreateCocktailScreen: () -> Unit,
+    @Assisted private val navigateToEditCocktailScreen: (Cocktail?) -> Unit,
     private val cocktailDetailsFactory: (
         ComponentContext,
         Cocktail,
         (Cocktail) -> Unit,
+        () -> Unit
     ) -> CocktailDetailsComponent,
     cocktailListFactory: (
         ComponentContext,
-        (Cocktail) -> Unit,
+        (Cocktail) -> Unit
     ) -> CocktailListComponent,
 ) : ICocktailsComponent, ComponentContext by componentContext {
     private val slotNavigation = SlotNavigation<SlotConfig>()
@@ -34,6 +36,10 @@ class CocktailsComponent(
         childContext(key = "cocktailList"),
         { cocktail -> slotNavigation.activate(SlotConfig.CocktailDetails(cocktail)) }
     )
+
+    override fun dismissCocktailDetails() {
+        slotNavigation.dismiss()
+    }
 
     @Parcelize
     private sealed interface SlotConfig : Parcelable {
@@ -58,12 +64,16 @@ class CocktailsComponent(
                     cocktailDetailsFactory(
                         componentContext,
                         slotConfig.cocktail,
-                        {}
+                        { navigateToEditCocktailScreen(slotConfig.cocktail) },
+                        {
+                            cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
+                            slotNavigation.dismiss()
+                        }
                     )
                 )
             }
         }
     }
 
-    override fun navigateToCreateCocktail() = navigateToCreateCocktailScreen()
+    override fun navigateToCreateCocktail() = navigateToEditCocktailScreen(null)
 }

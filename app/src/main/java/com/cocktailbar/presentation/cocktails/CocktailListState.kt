@@ -7,5 +7,5 @@ data class CocktailListState(
     val isLoading: Boolean = true,
     val cocktails: List<Cocktail> = emptyList(),
     val error: UiText? = null,
-    val clickedCocktailImage: String? = null,
+    val clickedCocktailImage: Any? = null,
 )

@@ -11,7 +11,6 @@ import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.presentation.cocktails.CocktailEditRootComponent
 import com.cocktailbar.presentation.cocktails.CocktailsComponent
 import com.cocktailbar.presentation.cocktails.CocktailsEvent
-import com.cocktailbar.presentation.cocktails.ICocktailsComponent
 import com.cocktailbar.util.toStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -22,7 +21,7 @@ import me.tatarka.inject.annotations.Inject
 class RootComponent(
     @Assisted componentContext: ComponentContext,
     private val cocktailsFactory:
-        (ComponentContext, () -> Unit) -> CocktailsComponent,
+        (ComponentContext, (Cocktail?) -> Unit) -> CocktailsComponent,
     private val cocktailEditRootComponentFactory:
         (
         ComponentContext,
@@ -51,7 +50,7 @@ class RootComponent(
                 IRootComponent.Child.CocktailsChild(
                     cocktailsFactory(
                         componentContext,
-                        { navigation.push(ChildConfig.CocktailCreate) }
+                        { cocktail -> navigation.push(ChildConfig.CocktailEdit(cocktail)) }
                     )
                 )
             }
@@ -63,24 +62,9 @@ class RootComponent(
                         config.cocktail,
                         {
                             navigation.pop {
-                                (childStack.value.active.instance as ICocktailsComponent)
-                                    .cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
-                            }
-                        },
-                        { navigation.pop() }
-                    )
-                )
-            }
-
-            is ChildConfig.CocktailCreate -> {
-                IRootComponent.Child.CocktailRootEditChild(
-                    cocktailEditRootComponentFactory(
-                        componentContext,
-                        null,
-                        {
-                            navigation.pop {
-                                (childStack.value.active.instance as IRootComponent.Child.CocktailsChild)
-                                    .component.cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+                                val cocktailsComponent = (childStack.value.active.instance as IRootComponent.Child.CocktailsChild).component
+                                cocktailsComponent.dismissCocktailDetails()
+                                cocktailsComponent.cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
                             }
                         },
                         { navigation.pop() }
@@ -96,9 +80,6 @@ class RootComponent(
         data object Cocktails : ChildConfig
 
         @Parcelize
-        data class CocktailEdit(val cocktail: Cocktail) : ChildConfig
-
-        @Parcelize
-        data object CocktailCreate : ChildConfig
+        data class CocktailEdit(val cocktail: Cocktail?) : ChildConfig
     }
 }
