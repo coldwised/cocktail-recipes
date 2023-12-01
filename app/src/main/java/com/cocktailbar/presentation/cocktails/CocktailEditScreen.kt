@@ -44,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
@@ -129,7 +128,7 @@ fun CocktailEditScreen(
 }
 
 @Composable
-fun CocktailImage(
+private fun CocktailImage(
     loaderProgress: Float?,
     image: String?,
     onPickerResult: (Uri?) -> Unit,
@@ -176,14 +175,16 @@ fun CocktailImage(
             )
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                progress = animatedProgress
+                progress = animatedProgress,
+                trackColor = MaterialTheme.colorScheme.secondary,
+                strokeWidth = 6.dp
             )
         }
     }
 }
 
 @Composable
-fun BottomBar(
+private fun BottomBar(
     saveLoading: Boolean,
     cancelLoading: Boolean,
     enabled: Boolean,
@@ -243,7 +244,7 @@ fun BottomBar(
 }
 
 @Composable
-fun Title(
+private fun Title(
     modifier: Modifier,
     shape: Shape,
     query: String,
@@ -268,7 +269,7 @@ fun Title(
 }
 
 @Composable
-fun Description(
+private fun Description(
     modifier: Modifier,
     shape: Shape,
     query: String,
@@ -293,7 +294,7 @@ fun Description(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun Ingredients(
+private fun Ingredients(
     ingredients: List<String>,
     onAddIngredientClick: () -> Unit,
     onRemoveIngredient: (Int) -> Unit
@@ -303,33 +304,35 @@ fun Ingredients(
     )
     Spacer(Modifier.height(8.dp))
     val flowRowModifier = Modifier.height(24.dp)
-    FlowRow(
-        verticalAlignment = CenterVertically
-    ) {
+    FlowRow {
         val iconButtonModifier = remember { Modifier.size(16.dp) }
         val closeIcon = remember { Icons.Default.Close }
         val circleShape = remember { CircleShape }
         val labelSmallStyle = MaterialTheme.typography.labelSmall
-        val chipSpacerModifier = remember { Modifier.width(6.dp) }
+        val chipHorizontalSpacerModifier = remember { Modifier.width(6.dp) }
+        val chipSpacerVerticalModifier = remember { Modifier.height(6.dp) }
         ingredients.forEachIndexed { index, ingredient ->
-            AssistChip(
-                modifier = flowRowModifier,
-                onClick = {},
-                shape = circleShape,
-                trailingIcon = {
-                    IconButton(
-                        modifier = iconButtonModifier,
-                        onClick = { onRemoveIngredient(index) }
-                    ) {
-                        Icon(
-                            imageVector = closeIcon,
-                            contentDescription = null
-                        )
-                    }
-                },
-                label = { Text(text = ingredient, style = labelSmallStyle) }
-            )
-            Spacer(chipSpacerModifier)
+            Column {
+                AssistChip(
+                    modifier = flowRowModifier,
+                    onClick = {},
+                    shape = circleShape,
+                    trailingIcon = {
+                        IconButton(
+                            modifier = iconButtonModifier,
+                            onClick = { onRemoveIngredient(index) }
+                        ) {
+                            Icon(
+                                imageVector = closeIcon,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    label = { Text(text = ingredient, style = labelSmallStyle) }
+                )
+                Spacer(chipSpacerVerticalModifier)
+            }
+            Spacer(chipHorizontalSpacerModifier)
         }
         IconButton(
             modifier = Modifier.size(24.dp), onClick = onAddIngredientClick,
@@ -344,7 +347,7 @@ fun Ingredients(
 }
 
 @Composable
-fun Recipe(
+private fun Recipe(
     modifier: Modifier,
     shape: Shape,
     query: String,

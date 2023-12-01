@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -62,9 +62,9 @@ dependencies {
     implementation "io.coil-kt:coil-compose:2.4.0"
 
     // MVIKotlin
-    implementation "com.arkivanov.mvikotlin:mvikotlin:3.2.1"
-    implementation "com.arkivanov.mvikotlin:mvikotlin-main:3.2.1"
-    implementation "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:3.2.1"
+//    implementation "com.arkivanov.mvikotlin:mvikotlin:3.2.1"
+//    implementation "com.arkivanov.mvikotlin:mvikotlin-main:3.2.1"
+//    implementation "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:3.2.1"
 
     // kotlin-inject
     ksp("me.tatarka.inject:kotlin-inject-compiler-ksp:0.6.2")

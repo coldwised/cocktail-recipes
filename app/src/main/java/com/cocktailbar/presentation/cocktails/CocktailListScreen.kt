@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -57,57 +60,95 @@ import com.cocktailbar.domain.model.Cocktail
 @Composable
 fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadding: Dp) {
     val state = cocktailListComponent.state.collectAsStateWithLifecycle().value
-    Box(modifier = Modifier
-        .statusBarsPadding()
-        .fillMaxSize()) {
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (state.cocktails.isNotEmpty()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = stringResource(R.string.my_cocktails),
-                    style = MaterialTheme.typography.headlineLarge
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                CocktailsGrid(
-                    cocktails = state.cocktails,
-                    bottomPadding = bottomPadding,
-                    onItemClicked = { cocktail, clickedCocktailImage ->
-                        cocktailListComponent.dispatch(CocktailsEvent.OnCocktailClicked(cocktail, clickedCocktailImage))
-                    }
-                )
-            }
-        } else {
-            CocktailListPlaceholder(bottomPadding)
+    val cocktailList = state.cocktails
+    Scaffold(
+        topBar = {
+            TopBar(cocktailList.isNotEmpty())
         }
-    }
-    val clickedCocktailImage = state.clickedCocktailImage
-    val imageExpanded = clickedCocktailImage != null
-    var cachedClickedCocktailImage by remember { mutableStateOf(clickedCocktailImage) }
-    LaunchedEffect(key1 = imageExpanded) {
-        if(imageExpanded) cachedClickedCocktailImage = clickedCocktailImage
-    }
-    AnimatedVisibility(
-        visible = imageExpanded,
-        enter = slideInVertically(
-            tween(400)
-        ) + fadeIn(tween(500)),
-        exit = slideOutVertically(
-            tween(700)
-        ) + fadeOut(tween(200))
-    ) {
-        AsyncImage(
-            model = cachedClickedCocktailImage,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            contentDescription = null
-        )
+    ) { paddingValues ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (state.cocktails.isNotEmpty()) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CocktailsGrid(
+                        cocktails = state.cocktails,
+                        bottomPadding = bottomPadding,
+                        topPadding = paddingValues.calculateTopPadding(),
+                        onItemClicked = { cocktail, clickedCocktailImage ->
+                            cocktailListComponent.dispatch(CocktailsEvent.OnCocktailClicked(cocktail, clickedCocktailImage))
+                        }
+                    )
+                }
+            } else {
+                CocktailListPlaceholder(bottomPadding)
+            }
+        }
+        val clickedCocktailImage = state.clickedCocktailImage
+        val imageExpanded = clickedCocktailImage != null
+        var cachedClickedCocktailImage by remember { mutableStateOf(clickedCocktailImage) }
+        LaunchedEffect(key1 = imageExpanded) {
+            if(imageExpanded) cachedClickedCocktailImage = clickedCocktailImage
+        }
+        AnimatedVisibility(
+            visible = imageExpanded,
+            enter = slideInVertically(
+                tween(400)
+            ) + fadeIn(tween(500)),
+            exit = slideOutVertically(
+                tween(700)
+            ) + fadeOut(tween(200))
+        ) {
+            AsyncImage(
+                model = cachedClickedCocktailImage,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                contentDescription = null
+            )
+        }
     }
 }
 
 @Composable
-fun CocktailListPlaceholder(bottomPadding: Dp) {
+private fun TopBar(showTopBar: Boolean) {
+    if(showTopBar) {
+        val topBarColor = remember {Color(0xFFFF88BB) }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            topBarColor,
+                            topBarColor.copy(alpha = 0.9f),
+                            topBarColor.copy(alpha = 0.8f),
+                            topBarColor.copy(alpha = 0.7f),
+                            topBarColor.copy(alpha = 0.6f),
+                            topBarColor.copy(alpha = 0.5f),
+                            topBarColor.copy(alpha = 0.4f),
+                            topBarColor.copy(alpha = 0.3f),
+                            topBarColor.copy(alpha = 0.2f),
+                            topBarColor.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                    ))
+                .statusBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(R.string.my_cocktails),
+                style = MaterialTheme.typography.headlineLarge
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun CocktailListPlaceholder(bottomPadding: Dp) {
     Column(
         modifier = Modifier
             .padding(bottom = bottomPadding)
@@ -147,15 +188,19 @@ fun CocktailListPlaceholder(bottomPadding: Dp) {
 
 
 @Composable
-fun CocktailsGrid(
+private fun CocktailsGrid(
     cocktails: List<Cocktail>,
     bottomPadding: Dp,
+    topPadding: Dp,
     onItemClicked: (Cocktail, Any) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
+        item(span = { GridItemSpan(this.maxLineSpan) }) {
+            Spacer(modifier = Modifier.height(topPadding))
+        }
         items(
             items = cocktails
         ) { cocktail ->
@@ -171,7 +216,7 @@ fun CocktailsGrid(
 }
 
 @Composable
-fun CocktailItem(
+private fun CocktailItem(
     cocktail: Cocktail,
     onItemClicked: (Cocktail, Any) -> Unit,
 ) {
@@ -190,20 +235,32 @@ fun CocktailItem(
             model = cocktail.image ?: placeHolderId,
             placeholder = painterResource(id = placeHolderId),
             contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.1f),
+                            Color.Black.copy(alpha = 0.5f)
+                        ),
+                        startY = 0.0f,
+                    )
+                ),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = cocktail.name,
                 color = Color.White,
-                fontSize = 18.sp,
-                lineHeight = 24.sp
+                fontSize = 20.sp,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }

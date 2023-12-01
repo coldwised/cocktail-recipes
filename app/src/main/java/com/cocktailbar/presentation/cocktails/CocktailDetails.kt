@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.R
@@ -47,19 +48,26 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
             Spacer(modifier = Modifier.height(27.dp))
             Text(
                 text = cocktail.name,
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
             )
             val description = cocktail.description
             if(description.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(description)
+                Text(
+                    text = description,
+                    textAlign = TextAlign.Center
+                )
             }
             val ingredients = cocktail.ingredients
             if(ingredients.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(32.dp))
                 val lastIndex = ingredients.lastIndex
                 for (index in ingredients.indices) {
-                    Text(ingredients[index])
+                    Text(
+                        text = ingredients[index],
+                        textAlign = TextAlign.Center
+                    )
                     if(index != lastIndex)
                         Divider(
                             Modifier
@@ -70,9 +78,16 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
             }
             cocktail.recipe.takeIf { it.isNotBlank() }?.let {
                 Spacer(modifier = Modifier.height(32.dp))
-                Text(text = stringResource(R.string.recipe_colon), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = stringResource(R.string.recipe_colon),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(it)
+                Text(
+                    text = it,
+                    textAlign = TextAlign.Center
+                )
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding() + 24.dp))
         }
@@ -80,7 +95,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
 }
 
 @Composable
-fun BottomBar(
+private fun BottomBar(
     isDeleteInProcess: Boolean,
     onEditClicked: () -> Unit,
     onDeleteClick: () -> Unit
