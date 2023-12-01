@@ -114,7 +114,7 @@ private fun BottomBar(
                 style = MaterialTheme.typography.headlineSmall
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Button(
             modifier = Modifier
                 .padding(horizontal = 16.dp)

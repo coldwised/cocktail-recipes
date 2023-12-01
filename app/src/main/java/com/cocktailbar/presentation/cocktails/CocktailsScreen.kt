@@ -62,8 +62,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
             modifier = Modifier.fillMaxSize(),
             scaffoldState = sheetScaffoldState,
             sheetContainerColor = MaterialTheme.colorScheme.background,
-            sheetTonalElevation = 0.dp,
-            sheetShadowElevation = 8.dp,
+            sheetShadowElevation = 4.dp,
             sheetContent = {
                 val child = childSlot.child
                 LaunchedEffect(child == null) {

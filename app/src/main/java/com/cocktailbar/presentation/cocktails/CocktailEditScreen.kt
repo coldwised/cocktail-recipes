@@ -240,7 +240,7 @@ private fun BottomBar(
                 )
             }
         }
-        Spacer(Modifier.height(26.dp))
+        Spacer(Modifier.height(16.dp))
     }
 }
 
