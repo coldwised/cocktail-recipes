@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -56,8 +57,9 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
     val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, 300f) }
     val customShape = remember { customShapeWithCutout(0f, 300f) }
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.navigationBarsPadding().fillMaxSize()) {
         BottomSheetScaffold(
+            modifier = Modifier.fillMaxSize(),
             scaffoldState = sheetScaffoldState,
             sheetContainerColor = MaterialTheme.colorScheme.background,
             sheetTonalElevation = 0.dp,
