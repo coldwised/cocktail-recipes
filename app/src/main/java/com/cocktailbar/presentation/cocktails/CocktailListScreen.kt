@@ -151,6 +151,7 @@ private fun TopBar(showTopBar: Boolean) {
 private fun CocktailListPlaceholder(bottomPadding: Dp) {
     Column(
         modifier = Modifier
+            .statusBarsPadding()
             .padding(bottom = bottomPadding)
             .fillMaxSize()
             .padding(horizontal = 38.dp)
