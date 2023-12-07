@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
+import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.util.toStateFlow
@@ -37,6 +38,14 @@ class CocktailEditRootComponent(
         { navigateToCocktailsWithRefresh() },
         { navigateBack() }
     )
+
+    private val backCallback = BackCallback {
+        cocktailEditComponent.dispatch(OnCancelClick)
+    }
+
+    init {
+        backHandler.register(backCallback)
+    }
 
     @Parcelize
     private sealed interface SlotConfig : Parcelable {

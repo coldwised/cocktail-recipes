@@ -25,7 +25,7 @@ class CocktailDataSourceImpl(
     }
 
     private fun generateUniqueFileName(uri: Uri): String {
-        val code = uri.toString().split('/').last()
+        val code = "${uri.toString().split('/').last()}_${System.currentTimeMillis()}"
         return "$code.jpg"
     }
 

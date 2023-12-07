@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +27,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -42,21 +47,27 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.cocktailbar.R
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CocktailEditScreen(
     cocktailEditComponent: ICocktailEditComponent
@@ -77,12 +88,20 @@ fun CocktailEditScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
+                .imePadding()
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
         ) {
             val pictureVerticalSpacerModifier = remember { Modifier.height(64.dp) }
             val verticalSpacerModifier = remember { Modifier.height(16.dp) }
+            val focusManager = LocalFocusManager.current
+            val imeIsVisible = WindowInsets.isImeVisible
+
+            LaunchedEffect(imeIsVisible) {
+                if(!imeIsVisible) focusManager.clearFocus()
+            }
+
             Spacer(modifier = pictureVerticalSpacerModifier)
             val textFieldShape = remember { RoundedCornerShape(50.dp) }
             CocktailImage(
@@ -96,6 +115,7 @@ fun CocktailEditScreen(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
                 query = state.title,
+                focusManager = focusManager,
                 onQueryChange = {
                     dispatch(ChangeTitleValue(it))
                 }
@@ -105,6 +125,7 @@ fun CocktailEditScreen(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
                 query = state.description,
+                focusManager = focusManager,
                 onQueryChange = {
                     dispatch(ChangeDescriptionValue(it))
                 }
@@ -145,7 +166,7 @@ private fun CocktailImage(
                 .Builder(LocalContext.current)
                 .data(image ?: R.drawable.cocktail_placeholder)
                 .crossfade(true)
-                .memoryCacheKey(image?.split('/')?.last()?.substringBefore('.'))
+                .memoryCacheKey(image?.split('/')?.last()?.substringBefore('_'))
                 .build(),
             contentScale = ContentScale.Crop
         )
@@ -167,17 +188,21 @@ private fun CocktailImage(
             contentScale = ContentScale.Crop,
             contentDescription = null
         )
+        val animatedProgress by animateFloatAsState(
+            targetValue = loaderProgress ?: 0f,
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+            label = "",
+            finishedListener = {
+                    progress -> if (progress >= 1f) onCocktailPictureLoaderCompleted()
+            }
+        )
+        println(loaderProgress)
         if (image != null && loaderProgress != null) {
-            val animatedProgress by animateFloatAsState(
-                targetValue = loaderProgress,
-                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                label = "",
-                finishedListener = { progress -> if (progress >= 1f) onCocktailPictureLoaderCompleted() }
-            )
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 progress = animatedProgress,
-                trackColor = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surface,
                 strokeWidth = 6.dp
             )
         }
@@ -249,8 +274,10 @@ private fun Title(
     modifier: Modifier,
     shape: Shape,
     query: String,
+    focusManager: FocusManager,
     onQueryChange: (String) -> Unit,
 ) {
+    val isError = query.isBlank()
     OutlinedTextField(
         modifier = modifier,
         shape = shape,
@@ -263,9 +290,17 @@ private fun Title(
             Text(stringResource(R.string.title))
         },
         supportingText = {
-            Text(stringResource(R.string.add_title))
+            if(isError) {
+                Text(stringResource(R.string.add_title))
+            }
         },
-        isError = query.isBlank()
+        isError = isError,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                focusManager.moveFocus(FocusDirection.Down)
+            }
+        )
     )
 }
 
@@ -274,6 +309,7 @@ private fun Description(
     modifier: Modifier,
     shape: Shape,
     query: String,
+    focusManager: FocusManager,
     onQueryChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -290,6 +326,12 @@ private fun Description(
         label = {
             Text(stringResource(R.string.description))
         },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                focusManager.moveFocus(FocusDirection.Down)
+            }
+        ),
     )
 }
 

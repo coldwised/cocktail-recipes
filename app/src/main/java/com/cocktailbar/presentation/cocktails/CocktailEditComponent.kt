@@ -35,6 +35,7 @@ class CocktailEditComponent(
             description = it.description,
             recipe = it.recipe,
             ingredients = it.ingredients,
+            cachedExistingCocktailImage = it.image,
         ) } ?: CocktailEditState())
 
     override val state = _state.asStateFlow()
@@ -50,6 +51,7 @@ class CocktailEditComponent(
                 is SaveCocktail -> {
                     stateFlow.update { it.copy(saveLoading = true) }
                     val state = stateFlow.value
+                    state.cachedExistingCocktailImage?.takeIf { it != state.image }?.let { deleteCocktailImageUseCase(it) }
                     saveCocktailUseCase(
                         Cocktail(
                             id = cocktail?.id,
@@ -65,9 +67,12 @@ class CocktailEditComponent(
                 }
 
                 is OnCancelClick -> {
-                    stateFlow.value.image?.let { image ->
-                        stateFlow.update { it.copy(removePictureLoading = true, image = null) }
-                        deleteCocktailImageUseCase(image)
+                    val stateValue = stateFlow.value
+                    stateValue.image?.let { image ->
+                        if(cocktail == null || image != stateValue.cachedExistingCocktailImage) {
+                            stateFlow.update { it.copy(removePictureLoading = true, image = null) }
+                            deleteCocktailImageUseCase(image)
+                        }
                     }
                     navigateBack()
                 }
@@ -86,9 +91,12 @@ class CocktailEditComponent(
 
                 is OnPickerResult -> {
                     val uri = event.uri ?: return@launch
-                    stateFlow.value.image?.let {
-                        launch(Dispatchers.IO) {
-                            deleteCocktailImageUseCase(it)
+                    val stateValue = stateFlow.value
+                    stateValue.image?.let {
+                        if(stateValue.cachedExistingCocktailImage != it) {
+                            launch(Dispatchers.IO) {
+                                deleteCocktailImageUseCase(it)
+                            }
                         }
                     }
                     stateFlow.update { it.copy(image = uri.toString()) }

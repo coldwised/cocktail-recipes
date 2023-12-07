@@ -114,7 +114,7 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
 @Composable
 private fun TopBar(showTopBar: Boolean) {
     if(showTopBar) {
-        val topBarColor = remember {Color(0xFFFF88BB) }
+        val topBarColor = MaterialTheme.colorScheme.tertiary
         Column(
             modifier = Modifier
                 .fillMaxWidth()
