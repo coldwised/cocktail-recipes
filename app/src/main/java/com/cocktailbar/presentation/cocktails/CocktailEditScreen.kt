@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -87,6 +88,7 @@ fun CocktailEditScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
+                .imePadding()
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
@@ -97,7 +99,7 @@ fun CocktailEditScreen(
             val imeIsVisible = WindowInsets.isImeVisible
 
             LaunchedEffect(imeIsVisible) {
-                if(!imeIsVisible) focusManager.clearFocus()
+                if (!imeIsVisible) focusManager.clearFocus()
             }
 
             Spacer(modifier = pictureVerticalSpacerModifier)
@@ -190,8 +192,8 @@ private fun CocktailImage(
             targetValue = loaderProgress ?: 0f,
             animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
             label = "",
-            finishedListener = {
-                    progress -> if (progress >= 1f) onCocktailPictureLoaderCompleted()
+            finishedListener = { progress ->
+                if (progress >= 1f) onCocktailPictureLoaderCompleted()
             }
         )
         println(loaderProgress)
@@ -216,12 +218,15 @@ private fun BottomBar(
     onCancelClick: () -> Unit
 ) {
     Column(
-        Modifier.padding(horizontal = 16.dp).navigationBarsPadding()
+        Modifier
+            .padding(horizontal = 16.dp)
+            .navigationBarsPadding()
     ) {
         val buttonModifier = remember {
             Modifier
                 .fillMaxWidth()
-                .height(55.dp) }
+                .height(55.dp)
+        }
         val progressBarModifier = remember { Modifier.size(20.dp) }
         Button(
             modifier = buttonModifier,
@@ -288,7 +293,7 @@ private fun Title(
             Text(stringResource(R.string.title))
         },
         supportingText = {
-            if(isError) {
+            if (isError) {
                 Text(stringResource(R.string.add_title))
             }
         },
