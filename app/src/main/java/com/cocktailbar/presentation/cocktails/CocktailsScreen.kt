@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.cocktailbar.R
+import com.cocktailbar.util.RoundedButtonShape
 import com.cocktailbar.util.toPx
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,8 +65,9 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
         label = "FAB"
     )
     val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
-    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, 300f) }
-    val customShape = remember { customShapeWithCutout(0f, 300f) }
+    val shapeCornerRadius = 120.dp.toPx()
+    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, shapeCornerRadius) }
+    val customShape = remember { customShapeWithCutout(0f, shapeCornerRadius) }
     var cocktailDetailImage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(cocktailDetailsOpened) {
         if (cocktailDetailsOpened) {
@@ -119,7 +120,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                 FloatingActionButton(
                     modifier = Modifier
                         .size(fabSize),
-                    shape = CircleShape,
+                    shape = RoundedButtonShape,
                     onClick = cocktailsComponent::navigateToCreateCocktail
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
@@ -50,8 +50,8 @@ class MainActivity : ComponentActivity() {
             ).rootComponentCreator.create(it)
         }
         setContent {
+            ChangeSystemBarsTheme(!isSystemInDarkTheme())
             CocktailBarTheme {
-                ChangeSystemBarsTheme(!isSystemInDarkTheme())
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun ChangeSystemBarsTheme(lightTheme: Boolean) {
         val barColor = TRANSPARENT
-        LaunchedEffect(lightTheme) {
+        DisposableEffect(lightTheme) {
             if (lightTheme) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.light(
@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
                     ),
                 )
             }
+            onDispose {}
         }
     }
 }

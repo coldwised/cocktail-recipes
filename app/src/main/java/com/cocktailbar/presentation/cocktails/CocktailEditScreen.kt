@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.cocktailbar.R
+import com.cocktailbar.util.RoundedButtonShape
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -103,7 +104,7 @@ fun CocktailEditScreen(
             }
 
             Spacer(modifier = pictureVerticalSpacerModifier)
-            val textFieldShape = remember { RoundedCornerShape(50.dp) }
+            val textFieldShape = remember { RoundedCornerShape(34.dp) }
             CocktailImage(
                 loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
                 image = state.image,
@@ -230,7 +231,7 @@ private fun BottomBar(
         val progressBarModifier = remember { Modifier.size(20.dp) }
         Button(
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = RoundedButtonShape,
             enabled = enabled,
             onClick = onSaveClick
         ) {
@@ -250,7 +251,7 @@ private fun BottomBar(
         Spacer(modifier = Modifier.height(6.dp))
         OutlinedButton(
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = RoundedButtonShape,
             onClick = onCancelClick,
             colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background),
             border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary)

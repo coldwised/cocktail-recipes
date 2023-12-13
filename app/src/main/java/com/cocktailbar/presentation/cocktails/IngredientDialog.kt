@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.R
+import com.cocktailbar.util.RoundedButtonShape
 
 @Composable
 fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
@@ -40,6 +41,7 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
         confirmButton = {
             OutlinedButton(
                 modifier = buttonModifier,
+                shape = RoundedButtonShape,
                 border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary),
                 onClick = { dispatch(IngredientDialogEvent.OnDismiss) }
             ) {
@@ -54,6 +56,7 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
             Button(
                 modifier = buttonModifier,
                 onClick = { dispatch(IngredientDialogEvent.OnSaveIngredient) },
+                shape = RoundedButtonShape,
                 enabled = !isBlankText
             ) {
                 Text(
@@ -78,7 +81,7 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
             OutlinedTextField(
                 modifier = Modifier.animateContentSize().focusRequester(focusRequester),
                 value = ingredientText,
-                shape = RoundedCornerShape(50.dp),
+                shape = RoundedCornerShape(34.dp),
                 onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) },
                 placeholder = {
                     Text(text = stringResource(R.string.ingredient_name_placeholder))

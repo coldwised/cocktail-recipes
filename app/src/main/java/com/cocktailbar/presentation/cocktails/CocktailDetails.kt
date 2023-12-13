@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.R
+import com.cocktailbar.util.RoundedButtonShape
 
 @Composable
 fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
@@ -108,7 +108,7 @@ private fun BottomBar(
                 .fillMaxWidth()
                 .height(55.dp),
             onClick = onEditClicked,
-            shape = CircleShape
+            shape = RoundedButtonShape,
         ) {
             Text(
                 text = stringResource(R.string.edit),
@@ -122,7 +122,7 @@ private fun BottomBar(
                 .fillMaxWidth()
                 .height(55.dp),
             onClick = onDeleteClick,
-            shape = CircleShape,
+            shape = RoundedButtonShape,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
         ) {
             if (isDeleteInProcess) {
