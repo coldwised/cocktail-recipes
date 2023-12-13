@@ -9,7 +9,7 @@ fun CocktailEntity.toCocktail(): Cocktail {
         name = name,
         description = description,
         recipe = recipe,
-        ingredients = ingredients.let { if(it.isBlank()) emptyList() else it.split(',') },
+        ingredients = ingredients.let { if(it.isBlank()) emptyList() else it.split("ъы") },
         image = image,
     )
 }
