@@ -48,13 +48,7 @@ class CocktailListComponent(
                 }
 
                 is CocktailsEvent.OnCocktailClicked -> {
-                    val cocktail = event.cocktail
-                    stateFlow.update { it.copy(clickedCocktailImage = event.clickedCocktailImage) }
-                    navigateToCocktailDetails(cocktail)
-                }
-
-                is CocktailsEvent.OnDismissCocktailDetails -> {
-                    stateFlow.update { it.copy(clickedCocktailImage = null) }
+                    navigateToCocktailDetails(event.cocktail)
                 }
             }
         }

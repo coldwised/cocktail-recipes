@@ -52,7 +52,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 textAlign = TextAlign.Center,
             )
             val description = cocktail.description
-            if(description.isNotBlank()) {
+            if (description.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = description,
@@ -60,7 +60,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 )
             }
             val ingredients = cocktail.ingredients
-            if(ingredients.isNotEmpty()) {
+            if (ingredients.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(32.dp))
                 val lastIndex = ingredients.lastIndex
                 for (index in ingredients.indices) {
@@ -68,12 +68,13 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                         text = ingredients[index],
                         textAlign = TextAlign.Center
                     )
-                    if(index != lastIndex)
+                    if (index != lastIndex)
                         Divider(
                             Modifier
                                 .padding(vertical = 16.dp)
                                 .width(9.dp)
-                                .height(1.dp))
+                                .height(1.dp)
+                        )
                 }
             }
             cocktail.recipe.takeIf { it.isNotBlank() }?.let {
@@ -124,7 +125,7 @@ private fun BottomBar(
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
         ) {
-            if(isDeleteInProcess) {
+            if (isDeleteInProcess) {
                 CircularProgressIndicator()
             } else {
                 Text(

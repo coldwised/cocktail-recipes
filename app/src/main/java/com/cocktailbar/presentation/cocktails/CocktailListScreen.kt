@@ -1,11 +1,5 @@
 package com.cocktailbar.presentation.cocktails
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,11 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,36 +67,12 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
                         cocktails = state.cocktails,
                         bottomPadding = bottomPadding,
                         topPadding = paddingValues.calculateTopPadding(),
-                        onItemClicked = { cocktail, clickedCocktailImage ->
-                            cocktailListComponent.dispatch(CocktailsEvent.OnCocktailClicked(cocktail, clickedCocktailImage))
-                        }
+                        onItemClicked = { cocktailListComponent.dispatch(CocktailsEvent.OnCocktailClicked(it)) }
                     )
                 }
             } else {
                 CocktailListPlaceholder(bottomPadding)
             }
-        }
-        val clickedCocktailImage = state.clickedCocktailImage
-        val imageExpanded = clickedCocktailImage != null
-        var cachedClickedCocktailImage by remember { mutableStateOf(clickedCocktailImage) }
-        LaunchedEffect(key1 = imageExpanded) {
-            if(imageExpanded) cachedClickedCocktailImage = clickedCocktailImage
-        }
-        AnimatedVisibility(
-            visible = imageExpanded,
-            enter = slideInVertically(
-                tween(400)
-            ) + fadeIn(tween(500)),
-            exit = slideOutVertically(
-                tween(700)
-            ) + fadeOut(tween(200))
-        ) {
-            AsyncImage(
-                model = cachedClickedCocktailImage,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                contentDescription = null
-            )
         }
     }
 }
@@ -193,7 +159,7 @@ private fun CocktailsGrid(
     cocktails: List<Cocktail>,
     bottomPadding: Dp,
     topPadding: Dp,
-    onItemClicked: (Cocktail, Any) -> Unit
+    onItemClicked: (Cocktail) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
@@ -219,7 +185,7 @@ private fun CocktailsGrid(
 @Composable
 private fun CocktailItem(
     cocktail: Cocktail,
-    onItemClicked: (Cocktail, Any) -> Unit,
+    onItemClicked: (Cocktail) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -228,7 +194,7 @@ private fun CocktailItem(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(54.dp))
             .clickable {
-                onItemClicked(cocktail, cocktail.image ?: R.drawable.cocktail_placeholder)
+                onItemClicked(cocktail)
             }
     ) {
         val placeHolderId = remember { R.drawable.cocktail_placeholder }

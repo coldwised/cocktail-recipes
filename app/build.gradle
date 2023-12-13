@@ -40,7 +40,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.3'
+        kotlinCompilerExtensionVersion '1.5.6'
     }
     packaging {
         resources {
@@ -50,27 +50,18 @@ android {
 }
 
 dependencies {
-
-    //decompose navigation
+    // Decompose
     implementation "com.arkivanov.decompose:decompose:2.1.0-alpha-03"
     implementation "com.arkivanov.decompose:extensions-compose-jetpack:2.1.0-alpha-03"
-    //implementation "com.arkivanov.decompose:extensions-compose-jetbrains:2.1.0-alpha-03"
-//    implementation 'io.github.xxfast:decompose-router:0.4.0'
-//    implementation 'io.github.xxfast:decompose-router-android:0.4.0'
 
     // Coil
     implementation "io.coil-kt:coil-compose:2.4.0"
-
-    // MVIKotlin
-//    implementation "com.arkivanov.mvikotlin:mvikotlin:3.2.1"
-//    implementation "com.arkivanov.mvikotlin:mvikotlin-main:3.2.1"
-//    implementation "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:3.2.1"
 
     // kotlin-inject
     ksp("me.tatarka.inject:kotlin-inject-compiler-ksp:0.6.2")
     implementation("me.tatarka.inject:kotlin-inject-runtime:0.6.2")
 
-    // sqldelight
+    // SQL-delight
     implementation "app.cash.sqldelight:android-driver:2.0.0"
 
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.7.0-rc01"

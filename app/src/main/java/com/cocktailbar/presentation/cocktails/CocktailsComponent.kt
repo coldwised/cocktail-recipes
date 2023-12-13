@@ -66,17 +66,10 @@ class CocktailsComponent(
                         componentContext,
                         slotConfig.cocktail,
                         { navigateToEditCocktailScreen(slotConfig.cocktail) },
-                        {
-                            slotNavigation.dismiss {
-                                cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
-                            }
-                        },
-                        {
-                            slotNavigation.dismiss {
-                                cocktailListComponent.dispatch(CocktailsEvent.OnDismissCocktailDetails)
-                                cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
-                            }
-                        }
+                        { slotNavigation.dismiss() },
+                        { slotNavigation.dismiss {
+                            cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+                        } }
                     )
                 )
             }

@@ -12,8 +12,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
     val ingredientText = state.ingredientText
     val isBlankText = ingredientText.isBlank()
     AlertDialog(
+        tonalElevation = 0.dp,
         onDismissRequest = { dispatch(IngredientDialogEvent.OnDismiss) },
         confirmButton = {
             OutlinedButton(
@@ -45,6 +49,7 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
                 )
             }
         },
+        shape = RoundedCornerShape(54.dp),
         dismissButton = {
             Button(
                 modifier = buttonModifier,
@@ -66,14 +71,19 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
             )
         },
         text = {
+            val focusRequester = remember { FocusRequester() }
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
             OutlinedTextField(
-                modifier = Modifier.animateContentSize(),
+                modifier = Modifier.animateContentSize().focusRequester(focusRequester),
                 value = ingredientText,
                 shape = RoundedCornerShape(50.dp),
                 onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) },
                 placeholder = {
                     Text(text = stringResource(R.string.ingredient_name_placeholder))
                 },
+                label = { Text(stringResource(R.string.ingredient)) },
                 singleLine = true,
                 supportingText = if (isBlankText) {
                     { Text(stringResource(R.string.add_name)) }

@@ -1,12 +1,17 @@
 package com.cocktailbar
 
+import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
@@ -36,7 +41,6 @@ abstract class ActivityComponent(@Component val appComponent: AppComponent) {
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalDecomposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val root = retainedComponent {
             ActivityComponent::class.create(
@@ -47,13 +51,39 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             CocktailBarTheme {
-                // A surface container using the 'background' color from the theme
+                ChangeSystemBarsTheme(!isSystemInDarkTheme())
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     RootScreen(root = root)
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun ChangeSystemBarsTheme(lightTheme: Boolean) {
+        val barColor = TRANSPARENT
+        LaunchedEffect(lightTheme) {
+            if (lightTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.light(
+                        barColor, barColor,
+                    ),
+                    navigationBarStyle = SystemBarStyle.light(
+                        barColor, barColor,
+                    ),
+                )
+            } else {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.dark(
+                        barColor,
+                    ),
+                    navigationBarStyle = SystemBarStyle.dark(
+                        barColor,
+                    ),
+                )
             }
         }
     }

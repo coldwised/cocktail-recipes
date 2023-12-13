@@ -1,6 +1,7 @@
 package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.statekeeper.consume
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.domain.use_case.SaveCocktailUseCase
 import com.cocktailbar.domain.use_case.DeleteCocktailImageUseCase
@@ -29,6 +30,7 @@ class CocktailEditComponent(
 ) : ComponentContext by componentContext, ICocktailEditComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private val _state = MutableStateFlow(
+        stateKeeper.consume(key = "COCKTAIL_EDIT_STATE") ?:
         cocktail?.let { CocktailEditState(
             image = it.image,
             title = it.name,
@@ -39,6 +41,10 @@ class CocktailEditComponent(
         ) } ?: CocktailEditState())
 
     override val state = _state.asStateFlow()
+
+    init {
+        stateKeeper.register(key = "COCKTAIL_EDIT_STATE") { _state.value }
+    }
 
     override fun dispatch(cocktailsUiEvent: CocktailEditUiEvent) {
         reduce(cocktailsUiEvent)
