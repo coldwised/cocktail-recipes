@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -58,13 +59,14 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val child = childSlot.child
     val cocktailDetailsOpened = child != null
+    val maxFabSize = remember { 80.dp }
     val fabSize by animateDpAsState(
         targetValue = if (cocktailDetailsOpened) {
             0.dp
-        } else 80.dp,
+        } else maxFabSize,
         label = "FAB"
     )
-    val fabCutoutRadiusPx = (fabSize / 2 + 6.dp).toPx()
+    val fabCutoutRadiusPx = (maxFabSize / 2 + 6.dp).toPx()
     val shapeCornerRadius = 120.dp.toPx()
     val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, shapeCornerRadius) }
     val customShape = remember { customShapeWithCutout(0f, shapeCornerRadius) }
@@ -105,11 +107,10 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                 sheetDragHandle = null,
                 sheetShape = if (cocktailDetailsOpened) customShape else customShapeWithCutout,
             ) { bottomSheetPaddingValues ->
-                if (!cocktailDetailsOpened)
-                    CocktailListScreen(
-                        cocktailsComponent.cocktailListComponent,
-                        bottomSheetPaddingValues.calculateBottomPadding()
-                    )
+                CocktailListScreen(
+                    cocktailsComponent.cocktailListComponent,
+                    bottomSheetPaddingValues.calculateBottomPadding()
+                )
                 AnimatedBackgroundImage(cocktailDetailsOpened, cocktailDetailImage)
             }
             Column(
@@ -137,14 +138,16 @@ private fun AnimatedBackgroundImage(cocktailDetailsOpened: Boolean, cocktailDeta
         visible = cocktailDetailsOpened,
         enter = slideInVertically(
             tween(300)
-        ) + fadeIn(tween(500)),
+        ) + fadeIn(tween(300)),
         exit = slideOutVertically(
-            tween(700)
-        ) + fadeOut(tween(200))
+            tween(300)
+        ) + fadeOut(tween(300))
     ) {
         AsyncImage(
             model = cocktailDetailImage ?: R.drawable.cocktail_placeholder,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(enabled = false, onClick = {}),
             contentScale = ContentScale.Crop,
             contentDescription = null
         )
