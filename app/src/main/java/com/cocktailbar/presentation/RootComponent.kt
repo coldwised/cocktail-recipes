@@ -10,7 +10,6 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.presentation.cocktails.CocktailEditRootComponent
 import com.cocktailbar.presentation.cocktails.CocktailsComponent
-import com.cocktailbar.presentation.cocktails.CocktailsEvent
 import com.cocktailbar.util.toStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -63,8 +62,7 @@ class RootComponent(
                         {
                             navigation.pop {
                                 val cocktailsComponent = (childStack.value.active.instance as IRootComponent.Child.CocktailsChild).component
-                                cocktailsComponent.dismissCocktailDetails()
-                                cocktailsComponent.cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+                                cocktailsComponent.dismissCocktailDetailsWithUpdate()
                             }
                         },
                         { navigation.pop() }

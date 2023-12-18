@@ -33,13 +33,40 @@ class CocktailsComponent(
 ) : ICocktailsComponent, ComponentContext by componentContext {
     private val slotNavigation = SlotNavigation<SlotConfig>()
 
+    private fun navigateToCocktailDetails(cocktail: Cocktail) {
+        slotNavigation.activate(SlotConfig.CocktailDetails(cocktail)) {
+            cocktailDetailImageComponent.show(cocktail.image)
+            fabComponent.changeVisibility(false)
+        }
+    }
+
     override val cocktailListComponent: ICocktailListComponent = cocktailListFactory(
-        childContext(key = "cocktailList"),
-        { cocktail -> slotNavigation.activate(SlotConfig.CocktailDetails(cocktail)) }
+        childContext(key = "cocktailListComponent"),
+        ::navigateToCocktailDetails
+    )
+
+    override val cocktailDetailImageComponent: ICocktailImageComponent = CocktailImageComponent(
+        childContext("cocktailImageComponent")
+    )
+
+    override val fabComponent: IFabComponent = FabComponent(
+        componentContext = childContext("fabComponent"),
+        navigateToCreateCocktail = ::navigateToCreateCocktail
     )
 
     override fun dismissCocktailDetails() {
-        slotNavigation.dismiss()
+        slotNavigation.dismiss {
+            cocktailDetailImageComponent.hide()
+            fabComponent.changeVisibility(true)
+        }
+    }
+
+    override fun dismissCocktailDetailsWithUpdate() {
+        slotNavigation.dismiss {
+            cocktailDetailImageComponent.hide()
+            fabComponent.changeVisibility(true)
+            cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+        }
     }
 
     @Parcelize
@@ -65,11 +92,9 @@ class CocktailsComponent(
                     cocktailDetailsFactory(
                         componentContext,
                         slotConfig.cocktail,
-                        { navigateToEditCocktailScreen(slotConfig.cocktail) },
-                        { slotNavigation.dismiss() },
-                        { slotNavigation.dismiss {
-                            cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
-                        } }
+                        navigateToEditCocktailScreen,
+                        ::dismissCocktailDetails,
+                        ::dismissCocktailDetailsWithUpdate
                     )
                 )
             }

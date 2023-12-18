@@ -197,7 +197,6 @@ private fun CocktailImage(
                 if (progress >= 1f) onCocktailPictureLoaderCompleted()
             }
         )
-        println(loaderProgress)
         if (image != null && loaderProgress != null) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),

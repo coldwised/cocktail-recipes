@@ -1,13 +1,5 @@
 package com.cocktailbar.presentation.cocktails
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,23 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -41,14 +25,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.cocktailbar.R
-import com.cocktailbar.util.RoundedButtonShape
 import com.cocktailbar.util.toPx
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,18 +39,10 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val child = childSlot.child
     val cocktailDetailsOpened = child != null
-    val maxFabSize = remember { 80.dp }
-    val fabSize by animateDpAsState(
-        targetValue = if (cocktailDetailsOpened) {
-            0.dp
-        } else maxFabSize,
-        label = "FAB"
-    )
-    val fabCutoutRadiusPx = (maxFabSize / 2 + 6.dp).toPx()
+    val fabCutoutRadiusPx = (80.dp / 2 + 6.dp).toPx()
     val shapeCornerRadius = 120.dp.toPx()
     val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, shapeCornerRadius) }
     val customShape = remember { customShapeWithCutout(0f, shapeCornerRadius) }
-    var cocktailDetailImage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(cocktailDetailsOpened) {
         if (cocktailDetailsOpened) {
             sheetState.expand()
@@ -95,9 +67,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                         if (cocktailDetailsOpened) {
                             when (val childInstance = child!!.instance) {
                                 is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
-                                    val component = childInstance.component
-                                    cocktailDetailImage = component.cocktail.image
-                                    CocktailDetails(component)
+                                    CocktailDetails(childInstance.component)
                                 }
                             }
                         }
@@ -111,46 +81,17 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                     cocktailsComponent.cocktailListComponent,
                     bottomSheetPaddingValues.calculateBottomPadding()
                 )
-                AnimatedBackgroundImage(cocktailDetailsOpened, cocktailDetailImage)
+                CocktailImage(cocktailsComponent.cocktailDetailImageComponent)
             }
             Column(
                 modifier = Modifier
                     .align(BottomCenter)
                     .padding(systemBarsPadding), horizontalAlignment = CenterHorizontally
             ) {
-                FloatingActionButton(
-                    modifier = Modifier
-                        .size(fabSize),
-                    shape = RoundedButtonShape,
-                    onClick = cocktailsComponent::navigateToCreateCocktail
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                }
+                CocktailFab(cocktailsComponent.fabComponent)
                 Spacer(Modifier.height(16.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun AnimatedBackgroundImage(cocktailDetailsOpened: Boolean, cocktailDetailImage: String?) {
-    AnimatedVisibility(
-        visible = cocktailDetailsOpened,
-        enter = slideInVertically(
-            tween(300)
-        ) + fadeIn(tween(300)),
-        exit = slideOutVertically(
-            tween(300)
-        ) + fadeOut(tween(300))
-    ) {
-        AsyncImage(
-            model = cocktailDetailImage ?: R.drawable.cocktail_placeholder,
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(enabled = false, onClick = {}),
-            contentScale = ContentScale.Crop,
-            contentDescription = null
-        )
     }
 }
 

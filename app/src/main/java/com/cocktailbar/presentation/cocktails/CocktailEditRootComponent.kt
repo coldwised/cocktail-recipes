@@ -32,7 +32,7 @@ class CocktailEditRootComponent(
 ) : ComponentContext by componentContext, ICocktailEditRootComponent {
     private val slotNavigation = SlotNavigation<SlotConfig>()
     override val cocktailEditComponent: ICocktailEditComponent = cocktailEditComponentFactory(
-        childContext("ICocktailEditComponent"),
+        childContext("cocktailEditComponent"),
         cocktail,
         { slotNavigation.activate(SlotConfig.CocktailIngredient) },
         { navigateToCocktailsWithRefresh() },

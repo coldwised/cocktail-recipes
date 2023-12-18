@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 interface ICocktailsComponent {
     val childSlot: StateFlow<ChildSlot<*, SlotChild>>
     val cocktailListComponent: ICocktailListComponent
+    val cocktailDetailImageComponent: ICocktailImageComponent
+    val fabComponent: IFabComponent
 
     sealed interface SlotChild {
         data class CocktailDetailsChild(val component: ICocktailDetailsComponent) : SlotChild
@@ -14,4 +16,5 @@ interface ICocktailsComponent {
     fun dismissCocktailDetails()
 
     fun navigateToCreateCocktail()
+    fun dismissCocktailDetailsWithUpdate()
 }
