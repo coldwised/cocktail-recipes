@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,7 +70,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                         textAlign = textCenterAlignment
                     )
                     if (index != lastIndex)
-                        Divider(
+                        HorizontalDivider(
                             Modifier
                                 .padding(vertical = 16.dp)
                                 .width(9.dp)
