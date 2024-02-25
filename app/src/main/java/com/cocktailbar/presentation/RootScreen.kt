@@ -16,10 +16,11 @@ fun RootScreen(root: IRootComponent) {
         stack = childStack,
         animation = stackAnimation(fade()),
     ) {
-        when(val child = it.instance) {
+        when (val child = it.instance) {
             is IRootComponent.Child.CocktailsChild -> {
                 CocktailsScreen(child.component)
             }
+
             is IRootComponent.Child.CocktailRootEditChild -> {
                 CocktailEditRootScreen(child.component)
             }

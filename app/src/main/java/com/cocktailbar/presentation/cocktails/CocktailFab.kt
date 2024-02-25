@@ -9,6 +9,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.util.RoundedButtonShape
@@ -24,7 +25,7 @@ fun CocktailFab(fabComponent: IFabComponent) {
         label = "FAB"
     )
     FloatingActionButton(
-        modifier = androidx.compose.ui.Modifier
+        modifier = Modifier
             .size(fabSize),
         shape = RoundedButtonShape,
         onClick = fabComponent::onClick

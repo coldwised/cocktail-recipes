@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,7 +44,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.cocktailbar.R
 import com.cocktailbar.domain.model.Cocktail
 
@@ -59,7 +61,7 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
         Box(modifier = Modifier
             .fillMaxSize()
         ) {
-            if (state.isLoading) {
+            if (state.loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (state.cocktails.isNotEmpty()) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -99,7 +101,8 @@ private fun TopBar(showTopBar: Boolean) {
                             topBarColor.copy(alpha = 0.1f),
                             Color.Transparent
                         ),
-                    ))
+                    )
+                )
                 .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -198,11 +201,24 @@ private fun CocktailItem(
             }
     ) {
         val placeHolderId = remember { R.drawable.cocktail_placeholder }
-        AsyncImage(
-            model = cocktail.image ?: placeHolderId,
-            placeholder = painterResource(id = placeHolderId),
+        val image = cocktail.image
+        val contentScale = ContentScale.Crop
+        val imageCacheKey = image?.split('/')?.last()?.substringBefore('_')
+        val coilPainter = rememberAsyncImagePainter(
+            model = ImageRequest
+                .Builder(LocalContext.current)
+                .data(image ?: placeHolderId)
+                .placeholder(placeHolderId)
+                .crossfade(true)
+                .memoryCacheKey(imageCacheKey)
+                .placeholderMemoryCacheKey(imageCacheKey)
+                .build(),
+            contentScale = contentScale
+        )
+        Image(
+            painter = coilPainter,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale
         )
         Column(
             modifier = Modifier

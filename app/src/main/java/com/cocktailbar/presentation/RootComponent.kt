@@ -61,7 +61,8 @@ class RootComponent(
                         config.cocktail,
                         {
                             navigation.pop {
-                                val cocktailsComponent = (childStack.value.active.instance as IRootComponent.Child.CocktailsChild).component
+                                val cocktailsComponent =
+                                    (childStack.value.active.instance as IRootComponent.Child.CocktailsChild).component
                                 cocktailsComponent.dismissCocktailDetailsWithUpdate()
                             }
                         },

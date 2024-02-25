@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 class FabComponent(
     componentContext: ComponentContext,
     private val navigateToCreateCocktail: () -> Unit,
-): IFabComponent, ComponentContext by componentContext {
+) : IFabComponent, ComponentContext by componentContext {
 
     private val _state = MutableStateFlow(
         stateKeeper.consume(key = "FAB_STATE") ?: FabState()

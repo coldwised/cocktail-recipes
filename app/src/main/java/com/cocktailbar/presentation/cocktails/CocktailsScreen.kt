@@ -15,6 +15,8 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -37,11 +39,13 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
     val sheetState = rememberStandardBottomSheetState()
     val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val child = childSlot.child
-    val cocktailDetailsOpened = child != null
+    val cocktailDetailsOpened by remember {
+        derivedStateOf { childSlot.child != null }
+    }
     val fabCutoutRadiusPx = (80.dp / 2 + 6.dp).toPx()
     val shapeCornerRadius = 120.dp.toPx()
-    val customShapeWithCutout = remember { customShapeWithCutout(fabCutoutRadiusPx, shapeCornerRadius) }
+    val customShapeWithCutout =
+        remember { customShapeWithCutout(fabCutoutRadiusPx, shapeCornerRadius) }
     val customShape = remember { customShapeWithCutout(0f, shapeCornerRadius) }
     LaunchedEffect(cocktailDetailsOpened) {
         if (cocktailDetailsOpened) {
@@ -65,7 +69,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
                             .height(478.dp)
                     ) {
                         if (cocktailDetailsOpened) {
-                            when (val childInstance = child!!.instance) {
+                            when (val childInstance = childSlot.child!!.instance) {
                                 is ICocktailsComponent.SlotChild.CocktailDetailsChild -> {
                                     CocktailDetails(childInstance.component)
                                 }

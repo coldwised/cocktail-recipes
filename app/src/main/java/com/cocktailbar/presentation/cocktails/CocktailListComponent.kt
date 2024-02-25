@@ -42,7 +42,7 @@ class CocktailListComponent(
                     stateFlow.update { emptyState }
                     getCocktailsUseCase().collect { cocktails ->
                         stateFlow.update {
-                            it.copy(cocktails = cocktails, isLoading = false)
+                            it.copy(cocktails = cocktails, loading = false)
                         }
                     }
                 }

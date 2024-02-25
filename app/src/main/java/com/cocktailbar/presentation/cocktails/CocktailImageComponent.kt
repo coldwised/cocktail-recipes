@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 
 class CocktailImageComponent(
     componentContext: ComponentContext
-): ICocktailImageComponent, ComponentContext by componentContext {
+) : ICocktailImageComponent, ComponentContext by componentContext {
     private val _state = MutableStateFlow(
         stateKeeper.consume(key = "COCKTAIL_IMAGE_STATE") ?: CocktailImageState()
     )

@@ -9,5 +9,6 @@ interface ICocktailDetailsComponent {
     fun onEditClick()
 
     fun onDeleteClick()
-    val isDeleteInProcess: StateFlow<Boolean>
+
+    val deletingInProgress: StateFlow<Boolean>
 }

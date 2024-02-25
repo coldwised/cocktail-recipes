@@ -3,9 +3,9 @@ package com.cocktailbar.presentation.cocktails
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.statekeeper.consume
 import com.cocktailbar.domain.model.Cocktail
-import com.cocktailbar.domain.use_case.SaveCocktailUseCase
 import com.cocktailbar.domain.use_case.DeleteCocktailImageUseCase
 import com.cocktailbar.domain.use_case.SaveCocktailImageUseCase
+import com.cocktailbar.domain.use_case.SaveCocktailUseCase
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,15 +30,16 @@ class CocktailEditComponent(
 ) : ComponentContext by componentContext, ICocktailEditComponent {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private val _state = MutableStateFlow(
-        stateKeeper.consume(key = "COCKTAIL_EDIT_STATE") ?:
-        cocktail?.let { CocktailEditState(
-            image = it.image,
-            title = it.name,
-            description = it.description,
-            recipe = it.recipe,
-            ingredients = it.ingredients,
-            cachedExistingCocktailImage = it.image,
-        ) } ?: CocktailEditState())
+        stateKeeper.consume(key = "COCKTAIL_EDIT_STATE") ?: cocktail?.let {
+            CocktailEditState(
+                image = it.image,
+                title = it.name,
+                description = it.description,
+                recipe = it.recipe,
+                ingredients = it.ingredients,
+                cachedExistingCocktailImage = it.image,
+            )
+        } ?: CocktailEditState())
 
     override val state = _state.asStateFlow()
 
@@ -55,9 +56,10 @@ class CocktailEditComponent(
             val stateFlow = _state
             when (event) {
                 is SaveCocktail -> {
-                    stateFlow.update { it.copy(saveLoading = true) }
+                    stateFlow.update { it.copy(savingInProgress = true) }
                     val state = stateFlow.value
-                    state.cachedExistingCocktailImage?.takeIf { it != state.image }?.let { deleteCocktailImageUseCase(it) }
+                    state.cachedExistingCocktailImage?.takeIf { it != state.image }
+                        ?.let { deleteCocktailImageUseCase(it) }
                     saveCocktailUseCase(
                         Cocktail(
                             id = cocktail?.id,
@@ -68,15 +70,15 @@ class CocktailEditComponent(
                             image = state.image,
                         )
                     )
-                    stateFlow.update { it.copy(saveLoading = false) }
+                    stateFlow.update { it.copy(savingInProgress = false) }
                     navigateToCocktailsWithRefresh()
                 }
 
                 is OnCancelClick -> {
                     val stateValue = stateFlow.value
                     stateValue.image?.let { image ->
-                        if(cocktail == null || image != stateValue.cachedExistingCocktailImage) {
-                            stateFlow.update { it.copy(removePictureLoading = true, image = null) }
+                        if (cocktail == null || image != stateValue.cachedExistingCocktailImage) {
+                            stateFlow.update { it.copy(cancellationInProgress = true, image = null) }
                             deleteCocktailImageUseCase(image)
                         }
                     }
@@ -99,7 +101,7 @@ class CocktailEditComponent(
                     val uri = event.uri ?: return@launch
                     val stateValue = stateFlow.value
                     stateValue.image?.let {
-                        if(stateValue.cachedExistingCocktailImage != it) {
+                        if (stateValue.cachedExistingCocktailImage != it) {
                             launch(Dispatchers.IO) {
                                 deleteCocktailImageUseCase(it)
                             }

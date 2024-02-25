@@ -80,8 +80,8 @@ fun CocktailEditScreen(
         bottomBar = {
             BottomBar(
                 enabled = state.imageLoaderProgressPercentage == null && state.title.isNotBlank(),
-                saveLoading = state.saveLoading,
-                cancelLoading = state.removePictureLoading,
+                savingInProgress = state.savingInProgress,
+                cancellationInProgress = state.cancellationInProgress,
                 onSaveClick = { dispatch(SaveCocktail) },
                 onCancelClick = { dispatch(OnCancelClick) }
             )
@@ -162,12 +162,14 @@ private fun CocktailImage(
         onResult = onPickerResult
     )
     Box {
+        val imageCacheKey = image?.split('/')?.last()?.substringBefore('_')
         val coilPainter = rememberAsyncImagePainter(
             model = ImageRequest
                 .Builder(LocalContext.current)
                 .data(image ?: R.drawable.cocktail_placeholder)
                 .crossfade(true)
-                .memoryCacheKey(image?.split('/')?.last()?.substringBefore('_'))
+                .memoryCacheKey(imageCacheKey)
+                .placeholderMemoryCacheKey(imageCacheKey)
                 .build(),
             contentScale = ContentScale.Crop
         )
@@ -200,7 +202,7 @@ private fun CocktailImage(
         if (image != null && loaderProgress != null) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                progress = animatedProgress,
+                progress = { animatedProgress },
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surface,
                 strokeWidth = 6.dp
@@ -211,8 +213,8 @@ private fun CocktailImage(
 
 @Composable
 private fun BottomBar(
-    saveLoading: Boolean,
-    cancelLoading: Boolean,
+    savingInProgress: Boolean,
+    cancellationInProgress: Boolean,
     enabled: Boolean,
     onSaveClick: () -> Unit,
     onCancelClick: () -> Unit
@@ -234,7 +236,7 @@ private fun BottomBar(
             enabled = enabled,
             onClick = onSaveClick
         ) {
-            if (saveLoading) {
+            if (savingInProgress) {
                 CircularProgressIndicator(
                     modifier = progressBarModifier,
                     strokeWidth = 3.dp,
@@ -255,7 +257,7 @@ private fun BottomBar(
             colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background),
             border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary)
         ) {
-            if (cancelLoading) {
+            if (cancellationInProgress) {
                 CircularProgressIndicator(
                     modifier = progressBarModifier,
                     strokeWidth = 3.dp,

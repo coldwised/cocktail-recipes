@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,11 +29,11 @@ import com.cocktailbar.util.RoundedButtonShape
 @Composable
 fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
     val cocktail = cocktailDetails.cocktail
-    val isDeleteInProcess = cocktailDetails.isDeleteInProcess.collectAsStateWithLifecycle().value
+    val deletingInProgress = cocktailDetails.deletingInProgress.collectAsStateWithLifecycle().value
     Scaffold(
         bottomBar = {
             BottomBar(
-                isDeleteInProcess,
+                deletingInProgress,
                 cocktailDetails::onEditClick,
                 cocktailDetails::onDeleteClick
             )
@@ -45,18 +46,19 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val textCenterAlignment = TextAlign.Center
             Spacer(modifier = Modifier.height(27.dp))
             Text(
                 text = cocktail.name,
                 style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
+                textAlign = textCenterAlignment,
             )
             val description = cocktail.description
             if (description.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = description,
-                    textAlign = TextAlign.Center
+                    textAlign = textCenterAlignment
                 )
             }
             val ingredients = cocktail.ingredients
@@ -66,7 +68,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 for (index in ingredients.indices) {
                     Text(
                         text = ingredients[index],
-                        textAlign = TextAlign.Center
+                        textAlign = textCenterAlignment
                     )
                     if (index != lastIndex)
                         Divider(
@@ -82,12 +84,12 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 Text(
                     text = stringResource(R.string.recipe_colon),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = textCenterAlignment
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = it,
-                    textAlign = TextAlign.Center
+                    textAlign = textCenterAlignment
                 )
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding() + 24.dp))
@@ -97,22 +99,24 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
 
 @Composable
 private fun BottomBar(
-    isDeleteInProcess: Boolean,
+    deletingInProgress: Boolean,
     onEditClicked: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Column {
+        val roundedButtonShape = RoundedButtonShape
+        val headlineSmallTextStyle = MaterialTheme.typography.headlineSmall
         Button(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .height(55.dp),
             onClick = onEditClicked,
-            shape = RoundedButtonShape,
+            shape = roundedButtonShape,
         ) {
             Text(
                 text = stringResource(R.string.edit),
-                style = MaterialTheme.typography.headlineSmall
+                style = headlineSmallTextStyle
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
@@ -122,15 +126,15 @@ private fun BottomBar(
                 .fillMaxWidth()
                 .height(55.dp),
             onClick = onDeleteClick,
-            shape = RoundedButtonShape,
+            shape = roundedButtonShape,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
         ) {
-            if (isDeleteInProcess) {
+            if (deletingInProgress) {
                 CircularProgressIndicator()
             } else {
                 Text(
                     text = stringResource(R.string.delete),
-                    style = MaterialTheme.typography.headlineSmall
+                    style = headlineSmallTextStyle
                 )
             }
         }

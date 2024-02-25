@@ -25,17 +25,17 @@ class CocktailDetailsComponent(
 ) : ICocktailDetailsComponent, ComponentContext by componentContext {
     private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
-    private val _isDeleteInProcess = MutableStateFlow(false)
-    override val isDeleteInProcess = _isDeleteInProcess.asStateFlow()
+    private val _deletingInProgress = MutableStateFlow(false)
+    override val deletingInProgress = _deletingInProgress.asStateFlow()
     override fun onEditClick() {
         navigateToEditCocktail(cocktail)
     }
 
     override fun onDeleteClick() {
         componentScope.launch {
-            _isDeleteInProcess.update { true }
+            _deletingInProgress.update { true }
             deleteCocktailUseCase(cocktail)
-            _isDeleteInProcess.update { false }
+            _deletingInProgress.update { false }
             navigateBackWithRefresh()
         }
     }

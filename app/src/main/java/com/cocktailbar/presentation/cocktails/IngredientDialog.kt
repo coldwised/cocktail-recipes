@@ -79,7 +79,9 @@ fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
                 focusRequester.requestFocus()
             }
             OutlinedTextField(
-                modifier = Modifier.animateContentSize().focusRequester(focusRequester),
+                modifier = Modifier
+                    .animateContentSize()
+                    .focusRequester(focusRequester),
                 value = ingredientText,
                 shape = RoundedCornerShape(34.dp),
                 onValueChange = { dispatch(IngredientDialogEvent.OnIngredientTextChanged(it)) },
