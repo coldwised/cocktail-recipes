@@ -131,7 +131,7 @@ private fun CocktailListPlaceholder(bottomPadding: Dp) {
         Spacer(modifier = Modifier.height(33.dp))
         Image(
             modifier = Modifier.size(283.dp),
-            painter = painterResource(id = R.drawable.summer_holidays),
+            painter = rememberAsyncImagePainter(R.drawable.summer_holidays),
             contentDescription = null
         )
         Spacer(modifier = Modifier.height(15.dp))
