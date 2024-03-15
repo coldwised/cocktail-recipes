@@ -16,8 +16,7 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.retainedComponent
-import com.cocktailbar.di.AppComponent
-import com.cocktailbar.di.create
+import com.cocktailbar.di.ApplicationComponent
 import com.cocktailbar.presentation.RootComponent
 import com.cocktailbar.presentation.RootScreen
 import com.cocktailbar.ui.theme.CocktailBarTheme
@@ -34,7 +33,7 @@ class RootComponentCreator(
 }
 
 @Component
-abstract class ActivityComponent(@Component val appComponent: AppComponent) {
+abstract class MainActivityComponent(@Component val parent: ApplicationComponent) {
     abstract val rootComponentCreator: RootComponentCreator
 }
 
@@ -43,10 +42,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val root = retainedComponent {
-            ActivityComponent::class.create(
-                AppComponent::class.create(
-                    applicationContext
-                )
+            MainActivityComponent::class.create(
+                ApplicationComponent.getInstance(this)
             ).rootComponentCreator.create(it)
         }
         setContent {

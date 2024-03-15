@@ -2,13 +2,13 @@ package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.statekeeper.consume
+import com.cocktailbar.di.MainImmediateDispatcher
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.domain.use_case.DeleteCocktailImageUseCase
 import com.cocktailbar.domain.use_case.SaveCocktailImageUseCase
-import com.cocktailbar.domain.use_case.SaveCocktailUseCase
 import com.cocktailbar.util.DownloadState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.cocktailbar.util.coroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,13 +22,15 @@ class CocktailEditComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted private val cocktail: Cocktail?,
     @Assisted private val openIngredientDialog: () -> Unit,
-    @Assisted private val navigateToCocktailsWithRefresh: () -> Unit,
+    @Assisted private val saveAndDismissCocktail: (Cocktail) -> Unit,
     @Assisted private val navigateBack: () -> Unit,
-    private val saveCocktailUseCase: SaveCocktailUseCase,
+    mainImmediateDispatcher: MainImmediateDispatcher,
     private val saveCocktailImageUseCase: SaveCocktailImageUseCase,
     private val deleteCocktailImageUseCase: DeleteCocktailImageUseCase,
 ) : ComponentContext by componentContext, ICocktailEditComponent {
-    private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+
+    private val componentScope = coroutineScope(mainImmediateDispatcher + SupervisorJob())
+
     private val _state = MutableStateFlow(
         stateKeeper.consume(key = "COCKTAIL_EDIT_STATE") ?: cocktail?.let {
             CocktailEditState(
@@ -51,16 +53,17 @@ class CocktailEditComponent(
         reduce(cocktailsUiEvent)
     }
 
+    private var imageLoadingJob: Job? = null
+
     private fun reduce(event: CocktailEditUiEvent) {
         componentScope.launch {
             val stateFlow = _state
             when (event) {
                 is SaveCocktail -> {
-                    stateFlow.update { it.copy(savingInProgress = true) }
                     val state = stateFlow.value
                     state.cachedExistingCocktailImage?.takeIf { it != state.image }
                         ?.let { deleteCocktailImageUseCase(it) }
-                    saveCocktailUseCase(
+                    saveAndDismissCocktail(
                         Cocktail(
                             id = cocktail?.id,
                             name = state.title,
@@ -70,19 +73,27 @@ class CocktailEditComponent(
                             image = state.image,
                         )
                     )
-                    stateFlow.update { it.copy(savingInProgress = false) }
-                    navigateToCocktailsWithRefresh()
                 }
 
                 is OnCancelClick -> {
                     val stateValue = stateFlow.value
-                    stateValue.image?.let { image ->
-                        if (cocktail == null || image != stateValue.cachedExistingCocktailImage) {
-                            stateFlow.update { it.copy(cancellationInProgress = true, image = null) }
-                            deleteCocktailImageUseCase(image)
+                    if (stateValue.imageLoaderProgressPercentage != null) {
+                        stateFlow.update { it.copy(cancellationInProgress = true) }
+                        imageLoadingJob?.join()
+                        stateValue.image?.let { image ->
+                            if (image != stateValue.cachedExistingCocktailImage) {
+                                deleteCocktailImageUseCase(image)
+                            }
                         }
+                        navigateBack()
+                    } else {
+                        stateValue.image?.let { image ->
+                            if (image != stateValue.cachedExistingCocktailImage) {
+                                deleteCocktailImageUseCase(image)
+                            }
+                        }
+                        navigateBack()
                     }
-                    navigateBack()
                 }
 
                 is ChangeTitleValue -> {
@@ -102,26 +113,26 @@ class CocktailEditComponent(
                     val stateValue = stateFlow.value
                     stateValue.image?.let {
                         if (stateValue.cachedExistingCocktailImage != it) {
-                            launch(Dispatchers.IO) {
-                                deleteCocktailImageUseCase(it)
-                            }
+                            deleteCocktailImageUseCase(it)
                         }
                     }
                     stateFlow.update { it.copy(image = uri.toString()) }
-                    saveCocktailImageUseCase(uri).collect { result ->
-                        when (result) {
-                            is DownloadState.Downloading -> stateFlow.update {
-                                it.copy(
-                                    imageLoaderProgressPercentage = result.progress
-                                )
-                            }
-
-                            is DownloadState.Finished -> {
-                                stateFlow.update {
+                    imageLoadingJob = componentScope.launch {
+                        saveCocktailImageUseCase(uri).collect { result ->
+                            when (result) {
+                                is DownloadState.Downloading -> stateFlow.update {
                                     it.copy(
-                                        image = result.value,
-                                        imageLoaderProgressPercentage = 100
+                                        imageLoaderProgressPercentage = result.progress
                                     )
+                                }
+
+                                is DownloadState.Finished -> {
+                                    stateFlow.update {
+                                        it.copy(
+                                            image = result.value,
+                                            imageLoaderProgressPercentage = 100
+                                        )
+                                    }
                                 }
                             }
                         }

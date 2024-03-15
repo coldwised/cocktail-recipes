@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -26,7 +27,7 @@ import com.cocktailbar.util.RoundedButtonShape
 
 @Composable
 fun IngredientDialog(ingredientDialogComponent: IIngredientDialogComponent) {
-    val state = ingredientDialogComponent.state.collectAsStateWithLifecycle().value
+    val state by ingredientDialogComponent.state.collectAsStateWithLifecycle()
     val dispatch = ingredientDialogComponent::dispatch
     val buttonModifier = remember {
         Modifier

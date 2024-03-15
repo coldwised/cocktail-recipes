@@ -14,7 +14,7 @@ FROM cocktailEntity;
 deleteCocktail:
 DELETE FROM cocktailEntity WHERE id = ?;
 
-addCocktail:
+saveCocktail:
 INSERT OR REPLACE
 INTO cocktailEntity
 VALUES(?, ?, ?, ?, ?, ?);

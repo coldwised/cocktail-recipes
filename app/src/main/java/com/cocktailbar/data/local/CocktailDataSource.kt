@@ -4,12 +4,11 @@ import android.net.Uri
 import cocktaildb.CocktailEntity
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.flow.Flow
-import java.io.File
 
 interface CocktailDataSource {
     suspend fun getCocktails(): List<CocktailEntity>
 
-    suspend fun addCocktail(
+    suspend fun saveCocktail(
         id: Long?,
         name: String,
         description: String,
@@ -17,8 +16,6 @@ interface CocktailDataSource {
         ingredients: String,
         image: String?
     )
-
-    fun getCocktailImagesDir(): File
 
     companion object {
         const val NAME = "cocktail.db"

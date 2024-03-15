@@ -1,14 +1,13 @@
 package com.cocktailbar.presentation.cocktails
 
+import androidx.compose.runtime.Stable
 import com.cocktailbar.domain.model.Cocktail
-import kotlinx.coroutines.flow.StateFlow
 
+@Stable
 interface ICocktailDetailsComponent {
     val cocktail: Cocktail
 
     fun onEditClick()
 
     fun onDeleteClick()
-
-    val deletingInProgress: StateFlow<Boolean>
 }

@@ -24,7 +24,7 @@ class CocktailsComponent(
         Cocktail,
         (Cocktail) -> Unit,
         () -> Unit,
-        () -> Unit
+        (Cocktail) -> Unit
     ) -> CocktailDetailsComponent,
     cocktailListFactory: (
         ComponentContext,
@@ -54,18 +54,26 @@ class CocktailsComponent(
         navigateToCreateCocktail = ::navigateToCreateCocktail
     )
 
-    override fun dismissCocktailDetails() {
+    private fun dismissCocktailDetails() {
         slotNavigation.dismiss {
             cocktailDetailImageComponent.hide()
             fabComponent.changeVisibility(true)
         }
     }
 
-    override fun dismissCocktailDetailsWithUpdate() {
+    override fun saveAndDismissCocktail(cocktail: Cocktail) {
         slotNavigation.dismiss {
             cocktailDetailImageComponent.hide()
             fabComponent.changeVisibility(true)
-            cocktailListComponent.dispatch(CocktailsEvent.LoadCocktails)
+            cocktailListComponent.dispatch(CocktailsEvent.OnAddCocktail(cocktail))
+        }
+    }
+
+    private fun deleteAndDismissCocktail(cocktail: Cocktail) {
+        slotNavigation.dismiss {
+            cocktailDetailImageComponent.hide()
+            fabComponent.changeVisibility(true)
+            cocktailListComponent.dispatch(CocktailsEvent.OnDeleteCocktail(cocktail))
         }
     }
 
@@ -94,7 +102,7 @@ class CocktailsComponent(
                         slotConfig.cocktail,
                         navigateToEditCocktailScreen,
                         ::dismissCocktailDetails,
-                        ::dismissCocktailDetailsWithUpdate
+                        ::deleteAndDismissCocktail
                     )
                 )
             }

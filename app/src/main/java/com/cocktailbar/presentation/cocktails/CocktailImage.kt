@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -18,12 +19,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.cocktailbar.R
+import com.cocktailbar.util.getImageCacheKey
 
 @Composable
 fun CocktailImage(cocktailImageComponent: ICocktailImageComponent) {
-    val state = cocktailImageComponent.state.collectAsStateWithLifecycle().value
+    val state by cocktailImageComponent.state.collectAsStateWithLifecycle()
     val image = state.image
+    val imageCacheKey = image?.let { getImageCacheKey(it) }
     val placeHolderId = remember { R.drawable.cocktail_placeholder }
+    val contentScale = ContentScale.Crop
     AnimatedVisibility(
         visible = state.visible,
         enter = slideInVertically(
@@ -33,8 +37,6 @@ fun CocktailImage(cocktailImageComponent: ICocktailImageComponent) {
             tween(300)
         ) + fadeOut(tween(300))
     ) {
-        val contentScale = ContentScale.Crop
-        val imageCacheKey = image?.split('/')?.last()?.substringBefore('_')
         val coilPainter = rememberAsyncImagePainter(
             model = ImageRequest
                 .Builder(LocalContext.current)

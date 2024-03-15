@@ -1,6 +1,7 @@
 package com.cocktailbar.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.fade
@@ -10,7 +11,7 @@ import com.cocktailbar.presentation.cocktails.CocktailsScreen
 
 @Composable
 fun RootScreen(root: IRootComponent) {
-    val childStack = root.childStack.collectAsStateWithLifecycle().value
+    val childStack by root.childStack.collectAsStateWithLifecycle()
 
     Children(
         stack = childStack,

@@ -1,10 +1,12 @@
 package com.cocktailbar.presentation.cocktails
 
 import com.arkivanov.decompose.ComponentContext
+import com.cocktailbar.di.MainImmediateDispatcher
 import com.cocktailbar.domain.model.Cocktail
+import com.cocktailbar.domain.use_case.DeleteCocktailUseCase
 import com.cocktailbar.domain.use_case.GetCocktailsUseCase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.cocktailbar.domain.use_case.SaveCocktailUseCase
+import com.cocktailbar.util.coroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,8 +20,11 @@ class CocktailListComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted private val navigateToCocktailDetails: (Cocktail) -> Unit,
     private val getCocktailsUseCase: GetCocktailsUseCase,
+    private val deleteCocktailUseCase: DeleteCocktailUseCase,
+    private val saveCocktailUseCase: SaveCocktailUseCase,
+    mainImmediateDispatcher: MainImmediateDispatcher
 ) : ComponentContext by componentContext, ICocktailListComponent {
-    private val componentScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val componentScope = coroutineScope(mainImmediateDispatcher + SupervisorJob())
 
     private val _state = MutableStateFlow(CocktailListState())
     override val state = _state.asStateFlow()
@@ -49,6 +54,25 @@ class CocktailListComponent(
 
                 is CocktailsEvent.OnCocktailClicked -> {
                     navigateToCocktailDetails(event.cocktail)
+                }
+
+                is CocktailsEvent.OnAddCocktail -> {
+                    stateFlow.update { it.copy(loading = true) }
+                    saveCocktailUseCase(event.cocktail)
+                    dispatch(CocktailsEvent.LoadCocktails)
+                }
+
+                is CocktailsEvent.OnDeleteCocktail -> {
+                    val cocktailToDelete = event.cocktail
+                    deleteCocktailUseCase(cocktailToDelete)
+                    stateFlow.update {
+                        val cocktailId = cocktailToDelete.id
+                        it.copy(
+                            cocktails = it.cocktails.filter { cocktail ->
+                                cocktail.id != cocktailId
+                            }
+                        )
+                    }
                 }
             }
         }

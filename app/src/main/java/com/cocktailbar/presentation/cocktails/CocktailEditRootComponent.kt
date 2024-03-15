@@ -20,13 +20,13 @@ import me.tatarka.inject.annotations.Inject
 class CocktailEditRootComponent(
     @Assisted componentContext: ComponentContext,
     @Assisted cocktail: Cocktail?,
-    @Assisted navigateToCocktailsWithRefresh: () -> Unit,
+    @Assisted saveAndDismissCocktail: (Cocktail) -> Unit,
     @Assisted navigateBack: () -> Unit,
     cocktailEditComponentFactory: (
         ComponentContext,
         Cocktail?,
         () -> Unit,
-        () -> Unit,
+        (Cocktail) -> Unit,
         () -> Unit
     ) -> CocktailEditComponent
 ) : ComponentContext by componentContext, ICocktailEditRootComponent {
@@ -35,7 +35,7 @@ class CocktailEditRootComponent(
         childContext("cocktailEditComponent"),
         cocktail,
         { slotNavigation.activate(SlotConfig.CocktailIngredient) },
-        { navigateToCocktailsWithRefresh() },
+        { cocktail -> saveAndDismissCocktail(cocktail) },
         { navigateBack() }
     )
 

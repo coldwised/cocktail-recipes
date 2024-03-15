@@ -15,6 +15,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -34,9 +35,8 @@ import com.cocktailbar.util.toPx
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
-    val childSlot = cocktailsComponent.childSlot.collectAsStateWithLifecycle().value
+    val childSlot by cocktailsComponent.childSlot.collectAsStateWithLifecycle()
     val sheetState = rememberStandardBottomSheetState()
-    val sheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val child = childSlot.child
     val cocktailDetailsOpened = remember(child) {
         child != null
@@ -57,7 +57,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
     Scaffold { systemBarsPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             BottomSheetScaffold(
-                scaffoldState = sheetScaffoldState,
+                scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState),
                 sheetContainerColor = MaterialTheme.colorScheme.background,
                 sheetShadowElevation = 4.dp,
                 sheetPeekHeight = 56.dp + systemBarsPadding.calculateBottomPadding(),

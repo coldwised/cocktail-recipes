@@ -25,7 +25,7 @@ class RootComponent(
         (
         ComponentContext,
         Cocktail?,
-        () -> Unit,
+        (Cocktail) -> Unit,
         () -> Unit
     ) -> CocktailEditRootComponent
 ) : IRootComponent, ComponentContext by componentContext {
@@ -59,11 +59,11 @@ class RootComponent(
                     cocktailEditRootComponentFactory(
                         componentContext,
                         config.cocktail,
-                        {
+                        { cocktail ->
                             navigation.pop {
                                 val cocktailsComponent =
                                     (childStack.value.active.instance as IRootComponent.Child.CocktailsChild).component
-                                cocktailsComponent.dismissCocktailDetailsWithUpdate()
+                                cocktailsComponent.saveAndDismissCocktail(cocktail)
                             }
                         },
                         { navigation.pop() }

@@ -48,6 +48,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -62,26 +63,38 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.cocktailbar.R
 import com.cocktailbar.util.RoundedButtonShape
+import com.cocktailbar.util.getImageCacheKey
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CocktailEditScreen(
     cocktailEditComponent: ICocktailEditComponent
 ) {
-    val state = cocktailEditComponent.state.collectAsStateWithLifecycle().value
     val dispatch = cocktailEditComponent::dispatch
-    val maxWidthModifier = remember { Modifier.fillMaxWidth() }
+    val state by cocktailEditComponent.state.collectAsStateWithLifecycle()
+    val pictureVerticalSpacerModifier = Modifier.height(64.dp)
+    val verticalSpacerModifier = Modifier.height(16.dp)
+    val focusManager = LocalFocusManager.current
+    val imeIsVisible = WindowInsets.isImeVisible
+    val textFieldShape = RoundedCornerShape(34.dp)
+    val maxWidthModifier = Modifier.fillMaxWidth()
+    LaunchedEffect(imeIsVisible) {
+        if (!imeIsVisible) focusManager.clearFocus()
+    }
     Scaffold(
         bottomBar = {
+            val enabled by remember {
+                derivedStateOf { state.imageLoaderProgressPercentage == null && state.title.isNotBlank() }
+            }
             BottomBar(
-                enabled = state.imageLoaderProgressPercentage == null && state.title.isNotBlank(),
-                savingInProgress = state.savingInProgress,
-                cancellationInProgress = state.cancellationInProgress,
+                enabled = enabled,
+                cancellationInProgress = { state.cancellationInProgress },
                 onSaveClick = { dispatch(SaveCocktail) },
                 onCancelClick = { dispatch(OnCancelClick) }
             )
@@ -94,48 +107,38 @@ fun CocktailEditScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
         ) {
-            val pictureVerticalSpacerModifier = remember { Modifier.height(64.dp) }
-            val verticalSpacerModifier = remember { Modifier.height(16.dp) }
-            val focusManager = LocalFocusManager.current
-            val imeIsVisible = WindowInsets.isImeVisible
-
-            LaunchedEffect(imeIsVisible) {
-                if (!imeIsVisible) focusManager.clearFocus()
-            }
-
             Spacer(modifier = pictureVerticalSpacerModifier)
-            val textFieldShape = remember { RoundedCornerShape(34.dp) }
             CocktailImage(
-                loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
                 image = state.image,
+                loaderProgress = state.imageLoaderProgressPercentage?.div(100f),
                 onPickerResult = { dispatch(OnPickerResult(it)) },
                 onCocktailPictureLoaderCompleted = { dispatch(OnCocktailPictureLoaderCompleted) }
             )
             Spacer(modifier = pictureVerticalSpacerModifier)
+
+            val focusManagerProvider = remember { { focusManager } }
             Title(
                 modifier = maxWidthModifier,
-                shape = textFieldShape,
                 query = state.title,
-                focusManager = focusManager,
-                onQueryChange = {
-                    dispatch(ChangeTitleValue(it))
-                }
+                focusManagerProvider = focusManagerProvider,
+                shape = textFieldShape,
+                onQueryChange =
+                { dispatch(ChangeTitleValue(it)) }
+
             )
             Spacer(modifier = verticalSpacerModifier)
             Description(
                 modifier = maxWidthModifier,
                 shape = textFieldShape,
                 query = state.description,
-                focusManager = focusManager,
-                onQueryChange = {
-                    dispatch(ChangeDescriptionValue(it))
-                }
+                focusManagerProvider = focusManagerProvider,
+                onQueryChange = { dispatch(ChangeDescriptionValue(it)) }
             )
             Spacer(modifier = verticalSpacerModifier)
             Ingredients(
                 ingredients = state.ingredients,
-                onAddIngredientClick = { dispatch(OnAddIngredientClicked) },
-                { dispatch(RemoveIngredient(it)) }
+                onAddIngredientClick = remember { { dispatch(OnAddIngredientClicked) } },
+                onRemoveIngredient = remember { { dispatch(RemoveIngredient(it)) } }
             )
             Spacer(modifier = verticalSpacerModifier)
             Recipe(
@@ -144,16 +147,15 @@ fun CocktailEditScreen(
                 query = state.recipe,
                 onQueryChange = { dispatch(ChangeRecipeValue(it)) }
             )
-            Spacer(modifier = verticalSpacerModifier)
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding() + 16.dp))
         }
     }
 }
 
 @Composable
 private fun CocktailImage(
-    loaderProgress: Float?,
     image: String?,
+    loaderProgress: Float?,
     onPickerResult: (Uri?) -> Unit,
     onCocktailPictureLoaderCompleted: () -> Unit
 ) {
@@ -162,7 +164,7 @@ private fun CocktailImage(
         onResult = onPickerResult
     )
     Box {
-        val imageCacheKey = image?.split('/')?.last()?.substringBefore('_')
+        val imageCacheKey = remember(image) { image?.let { getImageCacheKey(it) } }
         val coilPainter = rememberAsyncImagePainter(
             model = ImageRequest
                 .Builder(LocalContext.current)
@@ -213,9 +215,8 @@ private fun CocktailImage(
 
 @Composable
 private fun BottomBar(
-    savingInProgress: Boolean,
-    cancellationInProgress: Boolean,
     enabled: Boolean,
+    cancellationInProgress: () -> Boolean,
     onSaveClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
@@ -224,30 +225,21 @@ private fun BottomBar(
             .padding(horizontal = 16.dp)
             .navigationBarsPadding()
     ) {
-        val buttonModifier = remember {
-            Modifier
-                .fillMaxWidth()
-                .height(55.dp)
-        }
-        val progressBarModifier = remember { Modifier.size(20.dp) }
+        val buttonModifier = Modifier
+            .fillMaxWidth()
+            .height(55.dp)
+        val progressBarModifier = Modifier.size(20.dp)
+
         Button(
             modifier = buttonModifier,
             shape = RoundedButtonShape,
             enabled = enabled,
             onClick = onSaveClick
         ) {
-            if (savingInProgress) {
-                CircularProgressIndicator(
-                    modifier = progressBarModifier,
-                    strokeWidth = 3.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.save_button),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            }
+            Text(
+                text = stringResource(R.string.save_button),
+                style = MaterialTheme.typography.headlineSmall
+            )
         }
         Spacer(modifier = Modifier.height(6.dp))
         OutlinedButton(
@@ -257,7 +249,7 @@ private fun BottomBar(
             colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background),
             border = BorderStroke(1.0.dp, MaterialTheme.colorScheme.primary)
         ) {
-            if (cancellationInProgress) {
+            if (cancellationInProgress()) {
                 CircularProgressIndicator(
                     modifier = progressBarModifier,
                     strokeWidth = 3.dp,
@@ -279,7 +271,7 @@ private fun Title(
     modifier: Modifier,
     shape: Shape,
     query: String,
-    focusManager: FocusManager,
+    focusManagerProvider: () -> FocusManager,
     onQueryChange: (String) -> Unit,
 ) {
     val isError = query.isBlank()
@@ -303,7 +295,7 @@ private fun Title(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(FocusDirection.Down)
+                focusManagerProvider().moveFocus(FocusDirection.Down)
             }
         )
     )
@@ -314,7 +306,7 @@ private fun Description(
     modifier: Modifier,
     shape: Shape,
     query: String,
-    focusManager: FocusManager,
+    focusManagerProvider: () -> FocusManager,
     onQueryChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -334,7 +326,7 @@ private fun Description(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(FocusDirection.Down)
+                focusManagerProvider().moveFocus(FocusDirection.Down)
             }
         ),
     )
@@ -353,13 +345,13 @@ private fun Ingredients(
     Spacer(Modifier.height(8.dp))
     val flowRowModifier = Modifier.height(24.dp)
     FlowRow {
-        val iconButtonModifier = remember { Modifier.size(16.dp) }
-        val closeIcon = remember { Icons.Default.Close }
-        val circleShape = remember { CircleShape }
+        val iconButtonModifier = Modifier.size(16.dp)
+        val closeIcon = Icons.Default.Close
+        val circleShape = CircleShape
         val labelSmallStyle = MaterialTheme.typography.labelSmall
-        val chipHorizontalSpacerModifier = remember { Modifier.width(6.dp) }
-        val chipSpacerVerticalModifier = remember { Modifier.height(6.dp) }
-        ingredients.forEachIndexed { index, ingredient ->
+        val chipHorizontalSpacerModifier = Modifier.width(6.dp)
+        val chipSpacerVerticalModifier = Modifier.height(6.dp)
+        ingredients.fastForEachIndexed { index, ingredient ->
             Column {
                 AssistChip(
                     modifier = flowRowModifier,

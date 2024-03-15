@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface CocktailRepository {
     fun getCocktailList(): Flow<List<Cocktail>>
 
-    suspend fun addCocktail(cocktail: Cocktail)
+    suspend fun saveCocktail(cocktail: Cocktail)
     fun saveCocktailImage(uri: Uri): Flow<DownloadState<String>>
     suspend fun deleteCocktailImage(path: String)
     suspend fun deleteCocktail(cocktail: Cocktail)

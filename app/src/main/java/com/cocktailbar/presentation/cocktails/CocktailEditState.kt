@@ -1,9 +1,11 @@
 package com.cocktailbar.presentation.cocktails
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.arkivanov.essenty.parcelable.Parcelize
 
 @Parcelize
+@Immutable
 data class CocktailEditState(
     val image: String? = null,
     val cachedExistingCocktailImage: String? = null,
@@ -13,5 +15,5 @@ data class CocktailEditState(
     val recipe: String = "",
     val cancellationInProgress: Boolean = false,
     val ingredients: List<String> = emptyList(),
-    val savingInProgress: Boolean = false,
 ) : Parcelable
+

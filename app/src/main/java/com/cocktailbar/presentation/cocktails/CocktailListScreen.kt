@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
@@ -29,7 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,30 +47,37 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.cocktailbar.R
 import com.cocktailbar.domain.model.Cocktail
+import com.cocktailbar.util.getImageCacheKey
 
 @Composable
 fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadding: Dp) {
-    val state = cocktailListComponent.state.collectAsStateWithLifecycle().value
-    val cocktailList = state.cocktails
+    val state by cocktailListComponent.state.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
-            TopBar(cocktailList.isNotEmpty())
+            if (state.cocktails.isNotEmpty()) {
+                TopBar()
+            }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .fillMaxSize()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             if (state.loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (state.cocktails.isNotEmpty()) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CocktailsGrid(
-                        cocktails = state.cocktails,
-                        bottomPadding = bottomPadding,
-                        topPadding = paddingValues.calculateTopPadding(),
-                        onItemClicked = { cocktailListComponent.dispatch(CocktailsEvent.OnCocktailClicked(it)) }
-                    )
-                }
+                CocktailsGrid(
+                    cocktails = state.cocktails,
+                    bottomPadding = bottomPadding,
+                    topPadding = paddingValues.calculateTopPadding(),
+                    onItemClicked = {
+                        cocktailListComponent.dispatch(
+                            CocktailsEvent.OnCocktailClicked(
+                                it
+                            )
+                        )
+                    }
+                )
             } else {
                 CocktailListPlaceholder(bottomPadding)
             }
@@ -80,39 +86,37 @@ fun CocktailListScreen(cocktailListComponent: ICocktailListComponent, bottomPadd
 }
 
 @Composable
-private fun TopBar(showTopBar: Boolean) {
-    if(showTopBar) {
-        val topBarColor = MaterialTheme.colorScheme.tertiary
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            topBarColor,
-                            topBarColor.copy(alpha = 0.9f),
-                            topBarColor.copy(alpha = 0.8f),
-                            topBarColor.copy(alpha = 0.7f),
-                            topBarColor.copy(alpha = 0.6f),
-                            topBarColor.copy(alpha = 0.5f),
-                            topBarColor.copy(alpha = 0.4f),
-                            topBarColor.copy(alpha = 0.3f),
-                            topBarColor.copy(alpha = 0.2f),
-                            topBarColor.copy(alpha = 0.1f),
-                            Color.Transparent
-                        ),
-                    )
+private fun TopBar() {
+    val topBarColor = MaterialTheme.colorScheme.tertiary
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        topBarColor,
+                        topBarColor.copy(alpha = 0.9f),
+                        topBarColor.copy(alpha = 0.8f),
+                        topBarColor.copy(alpha = 0.7f),
+                        topBarColor.copy(alpha = 0.6f),
+                        topBarColor.copy(alpha = 0.5f),
+                        topBarColor.copy(alpha = 0.4f),
+                        topBarColor.copy(alpha = 0.3f),
+                        topBarColor.copy(alpha = 0.2f),
+                        topBarColor.copy(alpha = 0.1f),
+                        Color.Transparent
+                    ),
                 )
-                .statusBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = stringResource(R.string.my_cocktails),
-                style = MaterialTheme.typography.headlineLarge
             )
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+            .statusBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.my_cocktails),
+            style = MaterialTheme.typography.headlineLarge
+        )
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -166,21 +170,21 @@ private fun CocktailsGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            top = topPadding,
+            bottom = bottomPadding
+        )
     ) {
-        item(span = { GridItemSpan(this.maxLineSpan) }) {
-            Spacer(modifier = Modifier.height(topPadding))
-        }
         items(
-            items = cocktails
+            items = cocktails,
+            key = { requireNotNull(it.id) }
         ) { cocktail ->
             CocktailItem(
                 cocktail = cocktail,
                 onItemClicked = onItemClicked
             )
-        }
-        item(span = { GridItemSpan(this.maxLineSpan) }) {
-            Spacer(modifier = Modifier.height(bottomPadding))
         }
     }
 }
@@ -200,10 +204,10 @@ private fun CocktailItem(
                 onItemClicked(cocktail)
             }
     ) {
-        val placeHolderId = remember { R.drawable.cocktail_placeholder }
+        val placeHolderId = R.drawable.cocktail_placeholder
         val image = cocktail.image
         val contentScale = ContentScale.Crop
-        val imageCacheKey = image?.split('/')?.last()?.substringBefore('_')
+        val imageCacheKey = image?.let { getImageCacheKey(it) }
         val coilPainter = rememberAsyncImagePainter(
             model = ImageRequest
                 .Builder(LocalContext.current)

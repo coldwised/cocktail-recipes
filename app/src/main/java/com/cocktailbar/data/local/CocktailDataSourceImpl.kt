@@ -5,15 +5,19 @@ import android.net.Uri
 import cocktaildb.CocktailEntity
 import com.cocktailbar.CocktailDatabase
 import com.cocktailbar.data.local.CocktailDataSource.Companion.COCKTAIL_IMAGES_DIR
+import com.cocktailbar.di.IoDispatcher
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class CocktailDataSourceImpl(
     db: CocktailDatabase,
     fileProvider: FileProvider,
     private val contentResolver: ContentResolver,
+    private val ioDispatcher: IoDispatcher,
 ) : CocktailDataSource {
 
     private val queries = db.cocktailQueries
@@ -21,7 +25,9 @@ class CocktailDataSourceImpl(
     private val cocktailImagesDir = fileProvider.getFile(COCKTAIL_IMAGES_DIR)
 
     override suspend fun getCocktails(): List<CocktailEntity> {
-        return queries.getCocktails().executeAsList()
+        return withContext(ioDispatcher) {
+            queries.getCocktails().executeAsList()
+        }
     }
 
     private fun generateUniqueFileName(uri: Uri): String {
@@ -40,33 +46,38 @@ class CocktailDataSourceImpl(
                         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                         var progressBytes = 0L
                         var bytes = inputStream.read(buffer)
-                        while(bytes > 0) {
+                        while (true) {
                             outputStream.write(buffer, 0, bytes)
                             progressBytes += bytes
                             bytes = inputStream.read(buffer)
-                            emit(DownloadState.Downloading((progressBytes * 100 / totalBytes).toInt()))
+                            if (bytes <= 0) {
+                                break
+                            }
+                            emit(DownloadState.Downloading((progressBytes * 100f / totalBytes).toInt()))
                         }
                     }
                 }
             }
             emit(DownloadState.Finished(imageFile.path))
-        }
+        }.flowOn(ioDispatcher)
     }
 
     override suspend fun deleteCocktailImage(path: String) {
-        File(path).let {
-            if(it.exists()) it.delete()
+        withContext(ioDispatcher) {
+            File(path).let {
+                if (it.exists()) it.delete()
+            }
         }
     }
 
-    override fun getCocktailImagesDir() = cocktailImagesDir
-
     override suspend fun deleteCocktail(cocktailId: Long) {
-        queries.deleteCocktail(cocktailId)
+        withContext(ioDispatcher) {
+            queries.deleteCocktail(cocktailId)
+        }
     }
 
 
-    override suspend fun addCocktail(
+    override suspend fun saveCocktail(
         id: Long?,
         name: String,
         description: String,
@@ -74,13 +85,15 @@ class CocktailDataSourceImpl(
         ingredients: String,
         image: String?
     ) {
-        queries.addCocktail(
-            id = id,
-            name = name,
-            description = description,
-            recipe = recipe,
-            ingredients = ingredients,
-            image = image
-        )
+        withContext(ioDispatcher) {
+            queries.saveCocktail(
+                id = id,
+                name = name,
+                description = description,
+                recipe = recipe,
+                ingredients = ingredients,
+                image = image
+            )
+        }
     }
 }

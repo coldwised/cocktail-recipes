@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,18 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cocktailbar.R
 import com.cocktailbar.util.RoundedButtonShape
 
 @Composable
 fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
     val cocktail = cocktailDetails.cocktail
-    val deletingInProgress = cocktailDetails.deletingInProgress.collectAsStateWithLifecycle().value
     Scaffold(
         bottomBar = {
             BottomBar(
-                deletingInProgress,
                 cocktailDetails::onEditClick,
                 cocktailDetails::onDeleteClick
             )
@@ -78,18 +74,20 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                         )
                 }
             }
-            cocktail.recipe.takeIf { it.isNotBlank() }?.let {
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    text = stringResource(R.string.recipe_colon),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = textCenterAlignment
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = it,
-                    textAlign = textCenterAlignment
-                )
+            cocktail.recipe.let {
+                if (it.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text(
+                        text = stringResource(R.string.recipe_colon),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = textCenterAlignment
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        textAlign = textCenterAlignment
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding() + 24.dp))
         }
@@ -98,7 +96,6 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
 
 @Composable
 private fun BottomBar(
-    deletingInProgress: Boolean,
     onEditClicked: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -128,14 +125,10 @@ private fun BottomBar(
             shape = roundedButtonShape,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
         ) {
-            if (deletingInProgress) {
-                CircularProgressIndicator()
-            } else {
-                Text(
-                    text = stringResource(R.string.delete),
-                    style = headlineSmallTextStyle
-                )
-            }
+            Text(
+                text = stringResource(R.string.delete),
+                style = headlineSmallTextStyle
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

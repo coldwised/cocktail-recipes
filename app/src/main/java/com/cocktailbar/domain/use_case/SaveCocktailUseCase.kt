@@ -9,6 +9,6 @@ class SaveCocktailUseCase(
     private val repository: CocktailRepository
 ) {
     suspend operator fun invoke(cocktail: Cocktail) {
-        repository.addCocktail(cocktail)
+        repository.saveCocktail(cocktail)
     }
 }
