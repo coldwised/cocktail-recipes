@@ -29,13 +29,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.cocktailbar.util.toPx
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
-    val childSlot by cocktailsComponent.childSlot.collectAsStateWithLifecycle()
+    val childSlot by cocktailsComponent.childSlot.subscribeAsState()
     val sheetState = rememberStandardBottomSheetState()
     val child = childSlot.child
     val cocktailDetailsOpened = remember(child) {

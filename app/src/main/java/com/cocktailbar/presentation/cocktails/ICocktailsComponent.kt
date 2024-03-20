@@ -2,12 +2,12 @@ package com.cocktailbar.presentation.cocktails
 
 import androidx.compose.runtime.Stable
 import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.value.Value
 import com.cocktailbar.domain.model.Cocktail
-import kotlinx.coroutines.flow.StateFlow
 
 @Stable
 interface ICocktailsComponent {
-    val childSlot: StateFlow<ChildSlot<*, SlotChild>>
+    val childSlot: Value<ChildSlot<*, SlotChild>>
     val cocktailListComponent: ICocktailListComponent
     val cocktailDetailImageComponent: ICocktailImageComponent
     val fabComponent: IFabComponent

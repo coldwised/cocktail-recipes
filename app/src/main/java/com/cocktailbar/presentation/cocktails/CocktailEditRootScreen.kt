@@ -2,11 +2,11 @@ package com.cocktailbar.presentation.cocktails
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @Composable
 fun CocktailEditRootScreen(cocktailEditRootComponent: ICocktailEditRootComponent) {
-    val childSlot by cocktailEditRootComponent.childSlot.collectAsStateWithLifecycle()
+    val childSlot by cocktailEditRootComponent.childSlot.subscribeAsState()
     CocktailEditScreen(cocktailEditComponent = cocktailEditRootComponent.cocktailEditComponent)
     childSlot.child?.instance?.let { instance ->
         when (instance) {

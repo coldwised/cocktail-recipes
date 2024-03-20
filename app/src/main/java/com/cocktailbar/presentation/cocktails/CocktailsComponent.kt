@@ -7,11 +7,9 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
-import com.arkivanov.essenty.parcelable.Parcelable
+import com.arkivanov.decompose.value.Value
 import com.cocktailbar.domain.model.Cocktail
-import com.cocktailbar.util.toStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -77,18 +75,19 @@ class CocktailsComponent(
         }
     }
 
-    @Parcelize
-    private sealed interface SlotConfig : Parcelable {
-        @Parcelize
+    @Serializable
+    private sealed interface SlotConfig {
+        @Serializable
         data class CocktailDetails(val cocktail: Cocktail) : SlotConfig
     }
 
-    override val childSlot: StateFlow<ChildSlot<*, ICocktailsComponent.SlotChild>> =
+    override val childSlot: Value<ChildSlot<*, ICocktailsComponent.SlotChild>> =
         childSlot(
             source = slotNavigation,
             handleBackButton = true,
-            childFactory = ::createSlotChild
-        ).toStateFlow(lifecycle)
+            childFactory = ::createSlotChild,
+            serializer = SlotConfig.serializer()
+        )
 
     private fun createSlotChild(
         slotConfig: SlotConfig,

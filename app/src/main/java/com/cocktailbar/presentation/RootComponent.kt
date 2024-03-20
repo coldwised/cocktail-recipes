@@ -6,13 +6,11 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
-import com.arkivanov.essenty.parcelable.Parcelable
+import com.arkivanov.decompose.value.Value
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.presentation.cocktails.CocktailEditRootComponent
 import com.cocktailbar.presentation.cocktails.CocktailsComponent
-import com.cocktailbar.util.toStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -32,13 +30,14 @@ class RootComponent(
 
     private val navigation = StackNavigation<ChildConfig>()
 
-    override val childStack: StateFlow<ChildStack<*, IRootComponent.Child>> =
+    override val childStack: Value<ChildStack<*, IRootComponent.Child>> =
         childStack(
             source = navigation,
             initialConfiguration = ChildConfig.Cocktails,
             handleBackButton = true,
             childFactory = ::createChild,
-        ).toStateFlow(lifecycle)
+            serializer = ChildConfig.serializer()
+        )
 
     private fun createChild(
         config: ChildConfig,
@@ -73,12 +72,12 @@ class RootComponent(
         }
     }
 
-    @Parcelize
-    private sealed interface ChildConfig : Parcelable {
-        @Parcelize
+    @Serializable
+    private sealed interface ChildConfig {
+        @Serializable
         data object Cocktails : ChildConfig
 
-        @Parcelize
+        @Serializable
         data class CocktailEdit(val cocktail: Cocktail?) : ChildConfig
     }
 }

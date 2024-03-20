@@ -1,9 +1,9 @@
 package com.cocktailbar.domain.model
 
-import com.arkivanov.essenty.parcelable.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+
+@Serializable
 data class Cocktail(
     val id: Long? = null,
     val name: String,
@@ -11,4 +11,4 @@ data class Cocktail(
     val recipe: String,
     val ingredients: List<String>,
     val image: String?,
-): Parcelable
+)
