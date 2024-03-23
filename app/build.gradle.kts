@@ -82,7 +82,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.7.0-alpha05")
     implementation("androidx.compose.ui:ui-graphics:1.7.0-alpha05")
     implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-alpha05")
-    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3:1.3.0-alpha03")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
