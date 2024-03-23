@@ -59,7 +59,7 @@ fun CocktailsScreen(cocktailsComponent: ICocktailsComponent) {
             BottomSheetScaffold(
                 scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState),
                 sheetContainerColor = MaterialTheme.colorScheme.background,
-                sheetShadowElevation = 4.dp,
+                sheetTonalElevation = 1.dp,
                 sheetPeekHeight = 56.dp + systemBarsPadding.calculateBottomPadding(),
                 sheetContent = {
                     Box(
