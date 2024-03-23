@@ -35,9 +35,9 @@ class CocktailEditComponent(
             CocktailEditState(
                 image = it.image,
                 title = it.name,
-                description = it.description,
-                recipe = it.recipe,
-                ingredients = it.ingredients,
+                description = it.description.orEmpty(),
+                recipe = it.recipe.orEmpty(),
+                ingredients = it.ingredients.orEmpty(),
                 cachedExistingCocktailImage = it.image,
             )
         } ?: CocktailEditState())
@@ -66,9 +66,9 @@ class CocktailEditComponent(
                         Cocktail(
                             id = cocktail?.id,
                             name = state.title,
-                            description = state.description,
-                            recipe = state.recipe,
-                            ingredients = state.ingredients,
+                            description = state.description.ifBlank { null },
+                            recipe = state.recipe.ifBlank { null },
+                            ingredients = state.ingredients.ifEmpty { null },
                             image = state.image,
                         )
                     )

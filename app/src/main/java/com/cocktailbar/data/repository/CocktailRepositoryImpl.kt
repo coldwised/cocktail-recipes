@@ -8,6 +8,7 @@ import com.cocktailbar.di.Singleton
 import com.cocktailbar.domain.model.Cocktail
 import com.cocktailbar.domain.repository.CocktailRepository
 import com.cocktailbar.toCocktail
+import com.cocktailbar.toCocktailEntity
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -52,12 +53,7 @@ class CocktailRepositoryImpl(
 
     override suspend fun saveCocktail(cocktail: Cocktail) {
         cocktailDataSource.saveCocktail(
-            id = cocktail.id,
-            name = cocktail.name,
-            description = cocktail.description,
-            recipe = cocktail.recipe,
-            ingredients = cocktail.ingredients.joinToString("ъы"),
-            image = cocktail.image,
+            cocktail.toCocktailEntity()
         )
     }
 }

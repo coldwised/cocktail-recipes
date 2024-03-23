@@ -2,9 +2,8 @@ package com.cocktailbar.data.local
 
 import android.content.ContentResolver
 import android.net.Uri
-import cocktaildb.CocktailEntity
-import com.cocktailbar.CocktailDatabase
 import com.cocktailbar.data.local.CocktailDataSource.Companion.COCKTAIL_IMAGES_DIR
+import com.cocktailbar.data.local.entity.CocktailEntity
 import com.cocktailbar.di.IoDispatcher
 import com.cocktailbar.util.DownloadState
 import kotlinx.coroutines.flow.Flow
@@ -14,19 +13,17 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class CocktailDataSourceImpl(
-    db: CocktailDatabase,
+    private val cocktailDao: CocktailDao,
     fileProvider: FileProvider,
     private val contentResolver: ContentResolver,
     private val ioDispatcher: IoDispatcher,
 ) : CocktailDataSource {
 
-    private val queries = db.cocktailQueries
-
     private val cocktailImagesDir = fileProvider.getFile(COCKTAIL_IMAGES_DIR)
 
     override suspend fun getCocktails(): List<CocktailEntity> {
         return withContext(ioDispatcher) {
-            queries.getCocktails().executeAsList()
+            cocktailDao.getCocktails()
         }
     }
 
@@ -72,28 +69,16 @@ class CocktailDataSourceImpl(
 
     override suspend fun deleteCocktail(cocktailId: Long) {
         withContext(ioDispatcher) {
-            queries.deleteCocktail(cocktailId)
+            cocktailDao.deleteCocktail(cocktailId)
         }
     }
 
 
     override suspend fun saveCocktail(
-        id: Long?,
-        name: String,
-        description: String,
-        recipe: String,
-        ingredients: String,
-        image: String?
+        cocktail: CocktailEntity
     ) {
         withContext(ioDispatcher) {
-            queries.saveCocktail(
-                id = id,
-                name = name,
-                description = description,
-                recipe = recipe,
-                ingredients = ingredients,
-                image = image
-            )
+            cocktailDao.saveCocktail(cocktail)
         }
     }
 }

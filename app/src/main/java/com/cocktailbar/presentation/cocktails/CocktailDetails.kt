@@ -48,16 +48,14 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = textCenterAlignment,
             )
-            val description = cocktail.description
-            if (description.isNotBlank()) {
+            cocktail.description?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = description,
+                    text = it,
                     textAlign = textCenterAlignment
                 )
             }
-            val ingredients = cocktail.ingredients
-            if (ingredients.isNotEmpty()) {
+            cocktail.ingredients?.let { ingredients ->
                 Spacer(modifier = Modifier.height(32.dp))
                 val lastIndex = ingredients.lastIndex
                 for (index in ingredients.indices) {
@@ -74,8 +72,8 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                         )
                 }
             }
-            cocktail.recipe.let {
-                if (it.isNotBlank()) {
+            cocktail.recipe?.let { recipe ->
+                if (recipe.isNotBlank()) {
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = stringResource(R.string.recipe_colon),
@@ -84,7 +82,7 @@ fun CocktailDetails(cocktailDetails: ICocktailDetailsComponent) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = it,
+                        text = recipe,
                         textAlign = textCenterAlignment
                     )
                 }

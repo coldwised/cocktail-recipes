@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-    id("app.cash.sqldelight")
     kotlin("plugin.serialization")
 }
 
@@ -69,8 +68,12 @@ dependencies {
     ksp("me.tatarka.inject:kotlin-inject-compiler-ksp:0.6.3")
     implementation("me.tatarka.inject:kotlin-inject-runtime:0.6.3")
 
-    // SQL-delight
-    implementation("app.cash.sqldelight:android-driver:2.0.0")
+    // Room
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.core:core-ktx:1.12.0")
@@ -86,12 +89,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.0-alpha05")
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-alpha05")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.0-alpha05")
-}
-
-sqldelight {
-    databases {
-        create("CocktailDatabase") {
-            packageName.set("com.cocktailbar")
-        }
-    }
 }

@@ -3,7 +3,7 @@
 - Decompose
 - kotlin-inject
 - Coil compose
-- SQLDelight
+- Room
 
 ## Download android application
 https://github.com/olegaches/cocktail-recipes/releases/download/release-apk/app-release.apk

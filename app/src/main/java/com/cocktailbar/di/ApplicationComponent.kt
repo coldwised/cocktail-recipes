@@ -2,8 +2,8 @@ package com.cocktailbar.di
 
 import android.content.ContentResolver
 import android.content.Context
-import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import com.cocktailbar.CocktailDatabase
+import androidx.room.Room
+import com.cocktailbar.data.local.AppDatabase
 import com.cocktailbar.data.local.CocktailDataSource
 import com.cocktailbar.data.local.CocktailDataSourceImpl
 import com.cocktailbar.data.local.FileProviderImpl
@@ -73,13 +73,14 @@ abstract class ApplicationComponent(private val applicationContext: Context) {
         ioDispatcher: IoDispatcher
     ): CocktailDataSource {
         return CocktailDataSourceImpl(
-            db = CocktailDatabase(
-                AndroidSqliteDriver(
-                    schema = CocktailDatabase.Schema,
-                    context = applicationContext,
-                    name = CocktailDataSource.NAME
-                )
-            ),
+            cocktailDao = Room.databaseBuilder(
+                context = applicationContext,
+                AppDatabase::class.java,
+                AppDatabase.NAME,
+            )
+                .createFromAsset("database/${AppDatabase.NAME}")
+                .build()
+                .cocktailDao,
             fileProvider = FileProviderImpl(applicationContext),
             contentResolver = contentResolver,
             ioDispatcher = ioDispatcher
